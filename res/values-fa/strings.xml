@@ -27,74 +27,43 @@
     <string name="camera_label">دوربین عکاسی</string>
 
     <!-- label for the 'video recording application shown in the top level 'all applications' -->
-    <string name="video_camera_label">دوربین فیلمبرداری</string>
+    <string name="video_camera_label">دوربین فیلم‌برداری</string>
 
     <!-- label for the folder that contains Camera pictures in the gallery -->
-    <string name="gallery_camera_bucket_name">تصاویر دوربین</string>
+    <string name="gallery_camera_bucket_name">عکس‌های دوربین</string>
 
     <!-- label for the folder that contains Camera videos in the gallery -->
     <string name="gallery_camera_videos_bucket_name">فیلم‌های دوربین</string>
 
     <!-- alert to the user to wait for some operation to complete -->
-    <string name="wait">لطفا صبر کنید\u2026</string>
+    <string name="wait">لطفاً صبر کنید\u2026</string>
 
     <!-- alert to the user to that an SD card must be installed before using the camera -->
-    <string name="no_storage">لطفا قبل از استفاده از دوربین، یک کارت حافظه در گوشی قرار دهید.</string>
+    <string name="no_storage">برای استفاده از دوربین، یک کارت حافظه در گوشی قرار دهید.</string>
 
     <!-- alert to the user to that the SD card is too full to complete the operation -->
-    <string name="not_enough_space">کارت حافظهٔ شما پر است.</string>
+    <string name="not_enough_space">کارت حافظهٔ شما پر شده است.</string>
 
     <!-- alert to the user to that the SD card is being disk-checked -->
-    <string name="preparing_sd">در حال آماده‌سازی کارت حافظه\u2026</string>
+    <string name="preparing_sd">آماده‌سازی کارت حافظه\u2026</string>
 
     <!-- Settings stuff -->
 
-    <!-- Menu items: -->
-    <!-- menu pick to go to the settings screen -->
-
-    <!-- menu pick to view the details of the currently selected image -->
-
-    <!-- menu pick to show the location of the currently selected image on maps-->
-
-    <!-- menu pick to rotate the currently selected image (brings up submenu) -->
-
-    <!-- menu pick to rotate the currently selected image to the left -->
-
-    <!-- menu pick to rotate the currently selected image to the right -->
-
-    <!-- Confirmation dialog title after deleting a picture -->
-    <!-- Confirmation dialog message after deleting a picture -->
-    <!-- Confirmation dialog message after deleting a video -->
-
     <!-- Confirmation dialog when restoring settings -->
-    <string name="confirm_restore_title">بازگرداندن به پیش‌فرض‌ها</string>
-    <string name="confirm_restore_message">تنظیمات دوربین به پیش‌فرض‌ها باز گردانده خواهند شد.</string>
+    <string name="confirm_restore_title">بازگشت به تنظیمات پیش‌فرض</string>
+    <string name="confirm_restore_message">تنظیمات دوربین به حالت اولیه بازگردانده خواهد شد.</string>
 
     <!-- button in review mode indicating that the video just taken should be played -->
-    <string name="review_play">شروع</string>
+    <string name="review_play">پخش</string>
 
     <!-- button in review mode indicating that the video recording session should be canceled -->
-    <string name="review_cancel">لغو</string>
+    <string name="review_cancel">اتمام</string>
 
     <!-- button in review mode indicating that the taken video is OK to be attached/uploaded -->
-    <string name="review_ok">قبول</string>
+    <string name="review_ok">خُب</string>
 
     <!-- button in review mode indicate the user want to retake another picture for attachment -->
-    <string name="review_retake">دوباره</string>
-
-    <!-- button indicating that the picture just taken should be deleted -->
-
-    <!-- button indicating that the picture just taken should be shared by email, mms, etc -->
-
-    <!-- button indicating that the picture just taken should be set as a contact photo, wallpaper, etc -->
-
-    <!-- button indicating that the picture just taken should be cropped -->
-
-    <!-- Toast after trying to share a picture indicating that there are no applications which are capable of so doing. -->
-
-    <!-- Toast after trying to share a video indicating that there are no applications which are capable of so doing. -->
-
-    <!-- Menu item for playing the video. -->
+    <string name="review_retake">عکس‌برداری مجدد</string>
 
     <!-- Button indicating to go to the image gallery -->
     <string name="camera_gallery_photos_text">گالری</string>
@@ -107,30 +76,27 @@
     <string name="pref_camera_recordlocation_entry_on">روشن</string>
 
     <!-- The Video length settings in preference -->
-    <string name="pref_video_quality_title">کیفیت فیلم</string>
+    <string name="pref_video_quality_title">کیفیت ویدئو</string>
     <string name="pref_video_quality_entry_high">بالا (۳۰ دقیقه)</string>
     <string name="pref_video_quality_entry_low">پایین (۳۰ دقیقه)</string>
-    <string name="pref_video_quality_entry_mms">MMS (پایین، ۳۰ ثانیه)</string>
-    <string name="pref_video_quality_entry_youtube">یوتیوب (بالا، ۱۰ دقیقه)</string>
+    <string name="pref_video_quality_entry_mms">‏MMS (پایین، ۳۰ ثانیه)</string>
+    <string name="pref_video_quality_entry_youtube">‏YouTube (بالا، ۱۰ دقیقه)</string>
 
     <!-- Settings screen, Camera setting category title -->
-    <string name="pref_camera_settings_category">تنظیمات عکاسی</string>
+    <string name="pref_camera_settings_category">تنظیمات دوربین عکاسی</string>
 
     <!-- Settings screen, Camcorder setting category title -->
-    <string name="pref_camcorder_settings_category">تنظیمات فیلمبرداری</string>
+    <string name="pref_camcorder_settings_category">تنظامات دوربین فیلم‌برداری</string>
 
     <!-- Settings screen, Picture size title -->
-    <string name="pref_camera_picturesize_title">اندازهٔ تصویر</string>
+    <string name="pref_camera_picturesize_title">اندازهٔ عکس</string>
 
     <!-- Settings screen, Picture size dialog radio button choices -->
-    <string name="pref_camera_picturesize_entry_2592x1936">۵ مگاپیکسل</string>
-    <string name="pref_camera_picturesize_entry_2048x1536">۳ مگاپیکسل</string>
-    <string name="pref_camera_picturesize_entry_1600x1200">۲ مگاپیکسل</string>
-    <string name="pref_camera_picturesize_entry_1024x768">۱ مگاپیکسل</string>
+    <string name="pref_camera_picturesize_entry_2592x1936">‏۵ مگا پیکسل</string>
+    <string name="pref_camera_picturesize_entry_2048x1536">‏۳ مگا پیکسل</string>
+    <string name="pref_camera_picturesize_entry_1600x1200">‏۲ مگا پیکسل</string>
+    <string name="pref_camera_picturesize_entry_1024x768">‏۱ مگا پیکسل</string>
     <string name="pref_camera_picturesize_entry_320x240">QVGA</string>
-
-    <!-- Default picture quality setting. See
-         pref_camera_jpegquality_entryvalues for possible values -->
 
     <!-- Settings screen, Picture quality title -->
     <string name="pref_camera_jpegquality_title">کیفیت تصویر</string>
@@ -140,18 +106,16 @@
     <string name="pref_camera_jpegquality_entry_fine">خوب</string>
     <string name="pref_camera_jpegquality_entry_normal">معمولی</string>
 
-
     <!-- Settings screen, Focus mode title -->
     <string name="pref_camera_focusmode_title">حالت فوکوس</string>
 
     <!-- Settings screen, Focue mode dialog radio button choices -->
     <string name="pref_camera_focusmode_entry_auto">خودکار</string>
-    <string name="pref_camera_focusmode_entry_infinity">دور</string>
+    <string name="pref_camera_focusmode_entry_infinity">خیلی دور</string>
     <string name="pref_camera_focusmode_entry_macro">خیلی نزدیک</string>
 
-
     <!-- Settings screen, Flash mode title -->
-    <string name="pref_camera_flashmode_title">حالت فلاش</string>
+    <string name="pref_camera_flashmode_title">فلاش</string>
 
     <!-- Settings screen, Focue mode dialog radio button choices -->
     <string name="pref_camera_flashmode_entry_auto">خودکار</string>
@@ -159,30 +123,29 @@
     <string name="pref_camera_flashmode_entry_off">خاموش</string>
 
     <!-- Settings screen, white balance title -->
-    <string name="pref_camera_whitebalance_title">میزان سفیدی</string>
+    <string name="pref_camera_whitebalance_title">تعادل رنگ سفید</string>
 
     <!-- Settings screen, White balance dialog radio button choices -->
     <string name="pref_camera_whitebalance_entry_auto">خودکار</string>
-    <string name="pref_camera_whitebalance_entry_incandescent">نور تابان</string>
+    <string name="pref_camera_whitebalance_entry_incandescent">نور شدید</string>
     <string name="pref_camera_whitebalance_entry_daylight">نور روز</string>
-    <string name="pref_camera_whitebalance_entry_fluorescent">نور مهتابی</string>
+    <string name="pref_camera_whitebalance_entry_fluorescent">نور فلورسان</string>
     <string name="pref_camera_whitebalance_entry_cloudy">ابری</string>
-
 
     <!-- Settings screen, Select Color effect title -->
     <string name="pref_camera_coloreffect_title">جلوهٔ رنگ</string>
 
     <!-- Settings screen, Color effect dialog radio button choices -->
-    <string name="pref_camera_coloreffect_entry_none">هیچکدام</string>
-    <string name="pref_camera_coloreffect_entry_mono">تک رنگ</string>
+    <string name="pref_camera_coloreffect_entry_none">هیچ‌کدام</string>
+    <string name="pref_camera_coloreffect_entry_mono">تک‌ رنگ</string>
     <string name="pref_camera_coloreffect_entry_sepia">قرمز قهوه‌ای</string>
     <string name="pref_camera_coloreffect_entry_negative">نگاتیو</string>
     <!-- Color effect that overexposes and reverses some of the tones. -->
     <string name="pref_camera_coloreffect_entry_solarize">خورشیدی</string>
     <string name="pref_camera_coloreffect_entry_posterize">پوستری</string>
-    <string name="pref_camera_coloreffect_entry_aqua">آب رنگ</string>
+    <string name="pref_camera_coloreffect_entry_aqua">آب‌رنگ</string>
     <string name="pref_camera_coloreffect_entry_pastel">پاستل</string>
-    <string name="pref_camera_coloreffect_entry_mosaic">موزائیک</string>
+    <string name="pref_camera_coloreffect_entry_mosaic">موزاییک</string>
     <string name="pref_camera_coloreffect_entry_redtint">ته‌رنگ قرمز</string>
     <string name="pref_camera_coloreffect_entry_bluetint">ته‌رنگ آبی</string>
     <string name="pref_camera_coloreffect_entry_greentint">ته‌رنگ سبز</string>
@@ -193,7 +156,7 @@
     <!-- Settings menu, scene mode choices -->
     <string name="pref_camera_scenemode_entry_auto">خودکار</string>
     <!-- Scene mode that takes an image quickly with little motion blur. -->
-    <string name="pref_camera_scenemode_entry_action">حرکتی</string>
+    <string name="pref_camera_scenemode_entry_action">در حال حرکت</string>
     <!-- Scene mode that takes an image with as little noise as possible so details of the subject are maintained. -->
     <string name="pref_camera_scenemode_entry_portrait">پرتره</string>
     <!-- Scene mode that takes an image of a landscape assuming all subjects are relatively far from the phone. -->
@@ -201,7 +164,7 @@
     <!-- Scene mode that takes long exposures to capture night scenes without flash. -->
     <string name="pref_camera_scenemode_entry_night">شب</string>
     <!-- Scene mode that takes night shots with long exposure and flash to illuminate the subject while still capturing darker detail in the background. -->
-    <string name="pref_camera_scenemode_entry_night_portrait">منظره در شب</string>
+    <string name="pref_camera_scenemode_entry_night_portrait">پرتره در شب</string>
     <!-- Scene mode to be used in a stage show. -->
     <string name="pref_camera_scenemode_entry_theatre">تئاتر</string>
     <!-- Scene mode optimized for taking images on the beach. -->
@@ -209,71 +172,36 @@
     <!-- Scene mode optimized for taking images in the snow. -->
     <string name="pref_camera_scenemode_entry_snow">برف</string>
     <!-- Scene mode optimized for taking images in the sunset. -->
-    <string name="pref_camera_scenemode_entry_sunset">غروب آفتاب</string>
+    <string name="pref_camera_scenemode_entry_sunset">غروب خورشید</string>
     <!-- Scene mode for taking a photo as sharp as possible. -->
     <string name="pref_camera_scenemode_entry_steadyphoto">تصویر ساکن</string>
     <!-- Scene mode optimized for taking images of fireworks. -->
     <string name="pref_camera_scenemode_entry_fireworks">آتش‌بازی</string>
 
     <!-- Settings menu, enable quick capture mode or not -->
-    <string name="pref_camera_quickcapture_title">گرفتن سریع</string>
+    <string name="pref_camera_quickcapture_title">عکس‌برداری سریع</string>
     <string name="pref_camera_quickcapture_entry_on">روشن</string>
     <string name="pref_camera_quickcapture_entry_off">خاموش</string>
 
     <!-- Restore settings item in preference -->
     <string name="pref_restore_title">تنظیمات دوربین</string>
-    <string name="pref_restore_detail">بازگرداندن به پیش‌فرض‌ها</string>
+    <string name="pref_restore_detail">بازگرداندن تنظیمات پیش‌فرض</string>
 
     <!-- Exposure settings in preference -->
     <string name="pref_exposure_title">نمایش</string>
 
-
-    <!-- Framing grid settings in preference -->
-
-    <!-- Message to show when there's no lat/lng information in the image -->
-    <!-- Title of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-
-    <!-- Used to format image dimensions in Details dialog. e.g. 64 x 64 -->
-    <!-- Used to format short video duration in Details dialog. minutes:seconds e.g. 00:30 -->
-    <!-- Used to format video duration in Details dialog. hours:minutes:seconds e.g. 0:21:30 -->
-    <!-- Unit of measure in the Details dialog frames per second. e.g. 20 fps -->
-    <!-- Unit of measure in the Details dialog K bits per second. e.g. 192 Kbps -->
-    <!-- Unit of measure in the Details dialog M bits per second. e.g. 2.3 Mbps -->
     <!-- Details dialog "OK" button. Dismisses dialog. -->
-    <string name="details_ok">قبول</string>
-
-    <!-- Displayed in the title of the dialog for things to do with a picture that
-         is to be sent to another application: -->
-
-    <!-- Displayed in the title of the dialog for things to do with a picture that
-         is to be "set as" (e.g. set as contact photo or set as wallpaper) -->
-
-    <!-- Displayed in the title of the dialog for things to do with a video that
-         is to be sent to another application. -->
+    <string name="details_ok">خُب</string>
 
     <!-- Low-memory dialog message -->
-    <string name="spaceIsLow_content">کارت حافظهٔ شما در حال پر شدن است. تنظیمات کیفیت را تغییر دهید یا تعدادی از تصاویر را حذف کنید.</string>
+    <string name="spaceIsLow_content">کارت حافظهٔ شما در حال پر شدن است. یا کیفیت عکس را تغییر دهید یا تعدادی عکس از گالری حذف کنید.</string>
 
     <!-- The messsage shown when video record reaches size limit. -->
-    <string name="video_reach_size_limit">Size limit reached.</string>
+    <string name="video_reach_size_limit">بیش از این نمی‌توان پیوسته فیلم گرفت.</string>
 
     <!-- The title show on the zoom controller -->
     <string name="zoom_control_title">زوم</string>
 
-    <string name="switch_to_camera_lable">رفتن به حالت عکاسی</string>
-    <string name="switch_to_video_lable">رفتن به حالت فیلمبرداری</string>
+    <string name="switch_to_camera_lable">تغییر به حالت عکاسی</string>
+    <string name="switch_to_video_lable">تغییر به حالت فیلم‌برداری</string>
 </resources>
