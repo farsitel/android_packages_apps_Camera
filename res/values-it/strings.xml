@@ -40,14 +40,38 @@
     <string name="pref_video_quality_entry_high" msgid="2874184763684055612">"Alta (30 m)"</string>
     <string name="pref_video_quality_entry_low" msgid="5282945640948667598">"Bassa (30 m)"</string>
     <string name="pref_video_quality_entry_mms" msgid="2271260293894247704">"MMS (bassa, 30 s)"</string>
-    <string name="pref_video_quality_entry_youtube" msgid="3731902408685997150">"YouTube (alta, 10 m)"</string>
+    <string name="pref_video_quality_entry_youtube" msgid="3731902408685997150">"YouTube (alta, 15 m)"</string>
+    <string name="pref_video_quality_entry_custom">Personalizzata</string>
+     
+     <!-- Settings screen, Video quality title -->
+    <string name="pref_camera_videosize_title">Qualità Video</string>
+
+     <!-- Settings screen, Video encoder title -->
+    <string name="pref_camera_videoencoder_title">Encoder Video</string>
+
+     <!-- Settings screen, Video encoder dialog title -->
+    <string name="pref_camera_videoencoder_dialogtitle">Encoder Video</string>
+
+     <!-- Settings screen, Audio encoder title -->
+    <string name="pref_camera_audioencoder_title">Encoder Audio</string>
+ 
+     <!-- Settings screen, Video duration title -->
+    <string name="pref_camera_video_duration_title">Durata Video</string>
+
+     <!-- Settings screen, Video duration dialog radio button choices -->
+    <string name="pref_camera_video_duration_entry_mms">
+        30 secondi(MMS)
+    </string>
+    <string name="pref_camera_video_duration_entry_10">10 minuti</string>
+    <string name="pref_camera_video_duration_entry_30">30 minuti</string>
+
     <string name="pref_camera_settings_category" msgid="2576236450859613120">"Impostazioni fotocamera"</string>
     <string name="pref_camcorder_settings_category" msgid="460313486231965141">"Impostazioni videocamera"</string>
     <string name="pref_camera_picturesize_title" msgid="4333724936665883006">"Dimensioni foto"</string>
     <string name="pref_camera_picturesize_entry_2592x1936" msgid="1871154452633783418">"5 Megapixel"</string>
     <string name="pref_camera_picturesize_entry_2048x1536" msgid="8763841848102861602">"3 Megapixel"</string>
-    <string name="pref_camera_picturesize_entry_1600x1200" msgid="3802531502504271124">"2 Megapixel"</string>
-    <string name="pref_camera_picturesize_entry_1024x768" msgid="6557686202570581693">"1 Megapixel"</string>
+    <string name="pref_camera_picturesize_entry_1600x1200" msgid="3802531502504271124">UXGA</string>
+    <string name="pref_camera_picturesize_entry_1024x768" msgid="6557686202570581693">XGA</string>
     <string name="pref_camera_picturesize_entry_320x240" msgid="5729711026478753025">"QVGA"</string>
     <string name="pref_camera_jpegquality_title" msgid="6074540285403193970">"Qualità immagine"</string>
     <string name="pref_camera_jpegquality_entry_superfine" msgid="4087830022547613205">"Super fine"</string>
@@ -55,8 +79,10 @@
     <string name="pref_camera_jpegquality_entry_normal" msgid="1274801937207351293">"Normale"</string>
     <string name="pref_camera_focusmode_title" msgid="2877248921829329127">"Modalità messa a fuoco"</string>
     <string name="pref_camera_focusmode_entry_auto" msgid="7374820710300362457">"Automatica"</string>
-    <string name="pref_camera_focusmode_entry_infinity" msgid="3413922419264967552">"Infinito"</string>
+    <string name="pref_camera_focusmode_entry_normal">Normale</string>
+    <string name="pref_camera_focusmode_entry_infinity" msgid="3413922419264967552">"Off"</string>
     <string name="pref_camera_focusmode_entry_macro" msgid="4424489110551866161">"Macro"</string>
+    <string name="pref_camera_focusmode_entry_touch">Touch</string>
     <string name="pref_camera_flashmode_title" msgid="2287362477238791017">"Modalità flash"</string>
     <string name="pref_camera_flashmode_entry_auto" msgid="7288383434237457709">"Automatica"</string>
     <string name="pref_camera_flashmode_entry_on" msgid="5330043918845197616">"Attiva"</string>
@@ -80,6 +106,19 @@
     <string name="pref_camera_coloreffect_entry_redtint" msgid="7135044258970245718">"Tinta rossa"</string>
     <string name="pref_camera_coloreffect_entry_bluetint" msgid="987468567611774716">"Tinta blu"</string>
     <string name="pref_camera_coloreffect_entry_greentint" msgid="4205380735971677893">"Tinta verde"</string>
+
+    <!-- Settings screen, Select sharpness title -->
+    <string name="pref_camera_sharpness_title">Nitidezza</string>
+
+    <!-- Settings screen, Select contrast title -->
+    <string name="pref_camera_contrast_title">Contrasto</string>
+
+    <!-- Settings screen, Select saturation title -->
+    <string name="pref_camera_saturation_title">Saturazione</string>
+ 
+    <!-- Settings screen, Select brightness title -->
+    <string name="pref_camera_brightness_title">Luminosità</string>
+
     <string name="pref_camera_scenemode_title" msgid="1420535844292504016">"Modalità scena"</string>
     <string name="pref_camera_scenemode_entry_auto" msgid="7113995286836658648">"Automatica"</string>
     <string name="pref_camera_scenemode_entry_action" msgid="616748587566110484">"Movimento"</string>
@@ -105,4 +144,32 @@
     <string name="zoom_control_title" msgid="6532562653386981815">"Zoom"</string>
     <string name="switch_to_camera_lable" msgid="8248495141797448471">"Passa a fotocamera"</string>
     <string name="switch_to_video_lable" msgid="4525451949497982385">"Passa a video"</string>
+
+    <!-- Settings screen, Select Iso title -->
+     <string name="pref_camera_iso_title">Seleziona ISO</string>
+
+     <!-- Settings screen, lens shading radio button choices -->
+     <string name="pref_camera_lensshading_entry_enable">Attivo</string>
+     <string name="pref_camera_lensshading_entry_disable">Non attivo</string>
+
+     <!-- Settings screen, Select auto exposure title -->
+     <string name="pref_camera_autoexposure_title">Modalità di Misurazione</string>
+
+     <!-- Settings screen, auto exposure dialog radio button choices -->
+     <string name="pref_camera_autoexposure_entry_frameaverage">Valutativa</string>
+     <string name="pref_camera_autoexposure_entry_centerweighted">Ponderata Centrale</string>
+     <string name="pref_camera_autoexposure_entry_spotmetering">Spot</string>
+
+     <!-- Toast shown when touch-to-focus is enabled -->
+    <string name="touch_focus_enabled">Tocca lo schermo per mettere a fuoco.</string>
+
+     <!-- Stable shot setting title -->
+     <string name="pref_camera_stableshot_title">Stabilizzatore Immagine</string>
+
+     <!-- Stable shot settings entries -->
+     <string name="pref_camera_stableshot_entry_0">Non Attivo</string>
+     <string name="pref_camera_stableshot_entry_1">1/2 Secondo</string>
+     <string name="pref_camera_stableshot_entry_2">1 Secondo</string>
+     <string name="pref_camera_stableshot_entry_3">2 Secondi</string>
+
 </resources>

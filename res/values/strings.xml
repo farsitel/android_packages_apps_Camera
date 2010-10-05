@@ -108,13 +108,72 @@
     <string name="pref_camera_recordlocation_entry_off">Off</string>
     <string name="pref_camera_recordlocation_entry_on">On</string>
 
+
     <!-- The Video length settings in preference -->
     <string name="pref_video_quality_title">Video quality</string>
     <string name="pref_video_quality_default" translatable="false">high</string>
     <string name="pref_video_quality_entry_high">High (30m)</string>
     <string name="pref_video_quality_entry_low">Low (30m)</string>
     <string name="pref_video_quality_entry_mms">MMS (Low, 30s)</string>
-    <string name="pref_video_quality_entry_youtube">YouTube (High, 10m)</string>
+    <string name="pref_video_quality_entry_youtube">YouTube (High, 15m)</string>
+    <string name="pref_video_quality_entry_custom">Custom</string>
+    <!-- Default video quality setting. A numerical value. -->
+    <string name="pref_camera_videosize_default" translatable="false">qvga</string>
+
+    <!-- Settings screen, Video quality title -->
+    <string name="pref_camera_videosize_title">Video quality</string>
+
+    <!-- Settings screen, Video quality dialog radio button choices -->
+    <string name="pref_camera_videosize_entry_0">720P</string>
+    <string name="pref_camera_videosize_entry_1">D1</string>
+    <string name="pref_camera_videosize_entry_2">WVGA</string>
+    <string name="pref_camera_videosize_entry_3">VGA</string>
+    <string name="pref_camera_videosize_entry_4">HVGA</string>
+    <string name="pref_camera_videosize_entry_5">CIF</string>
+    <string name="pref_camera_videosize_entry_6">QVGA</string>
+    <string name="pref_camera_videosize_entry_7">QCIF</string>
+
+
+
+    <!-- Default video encoder setting. A numerical value. -->
+    <string name="pref_camera_videoencoder_default" translatable="false">m4v</string>
+
+    <!-- Settings screen, Video encoder title -->
+    <string name="pref_camera_videoencoder_title">Video Encoder</string>
+
+    <!-- Settings screen, Video encoder dialog radio button choices -->
+    <string name="pref_camera_videoencoder_entry_0">MPEG4</string>
+    <string name="pref_camera_videoencoder_entry_1">H263</string>
+    <string name="pref_camera_videoencoder_entry_2">H264</string>
+
+    <!-- Settings screen, Video encoder dialog title -->
+    <string name="pref_camera_videoencoder_dialogtitle">Video Encoder</string>
+
+    <!-- Default audio encoder setting. A numerical value. -->
+    <string name="pref_camera_audioencoder_default" translatable="false">amrnb</string>
+
+    <!-- Settings screen, Audio encoder title -->
+    <string name="pref_camera_audioencoder_title">Audio Encoder</string>
+
+    <!-- Settings screen, Audio encoder dialog radio button choices -->
+    <string name="pref_camera_audioencoder_entry_0">AMRNB</string>
+    <string name="pref_camera_audioencoder_entry_1">QCELP</string>
+    <string name="pref_camera_audioencoder_entry_2">EVRC</string>
+    <string name="pref_camera_audioencoder_entry_3">AAC</string>
+
+
+    <!-- Default video duration setting. A numerical value.-->
+    <string name="pref_camera_video_duration_default" translatable="false">10</string>
+
+    <!-- Settings screen, Video duration title -->
+    <string name="pref_camera_video_duration_title">Video duration</string>
+
+    <!-- Settings screen, Video duration dialog radio button choices -->
+    <string name="pref_camera_video_duration_entry_mms">
+        30 seconds(MMS)
+    </string>
+    <string name="pref_camera_video_duration_entry_10">10 minutes</string>
+    <string name="pref_camera_video_duration_entry_30">30 minutes</string>
 
     <!-- Settings screen, Camera setting category title -->
     <string name="pref_camera_settings_category">Camera settings</string>
@@ -126,11 +185,27 @@
     <string name="pref_camera_picturesize_title">Picture size</string>
 
     <!-- Settings screen, Picture size dialog radio button choices -->
+    <string name="pref_camera_picturesize_entry_3264x2448">8M Pixels</string>
+    <string name="pref_camera_picturesize_entry_3264x1952">6M Pixels (wide)</string>
     <string name="pref_camera_picturesize_entry_2592x1936">5M Pixels</string>
+    <string name="pref_camera_picturesize_entry_2592x1552">4M Pixels (wide)</string>
+    <string name="pref_camera_picturesize_entry_2560x1712">4M Pixels</string>
+    <string name="pref_camera_picturesize_entry_2304x1728">4M Pixels</string>
     <string name="pref_camera_picturesize_entry_2048x1536">3M Pixels</string>
-    <string name="pref_camera_picturesize_entry_1600x1200">2M Pixels</string>
-    <string name="pref_camera_picturesize_entry_1024x768">1M Pixels</string>
+    <string name="pref_camera_picturesize_entry_2048x1216">2.5M Pixels (wide)</string>
+    <string name="pref_camera_picturesize_entry_1920x1080">HD1080</string>
+    <string name="pref_camera_picturesize_entry_1600x1200">UXGA</string>
+    <string name="pref_camera_picturesize_entry_1280x1024">SXGA</string>
+    <string name="pref_camera_picturesize_entry_1280x960">SXGA (4:3)</string>
+    <string name="pref_camera_picturesize_entry_1280x768">WXGA</string>
+    <string name="pref_camera_picturesize_entry_1280x720">HD720</string>
+    <string name="pref_camera_picturesize_entry_1024x768">XGA</string>
+    <string name="pref_camera_picturesize_entry_800x600">SVGA</string>
+    <string name="pref_camera_picturesize_entry_800x480">WVGA</string>
+    <string name="pref_camera_picturesize_entry_640x480">VGA</string>
+    <string name="pref_camera_picturesize_entry_352x288">CIF</string>
     <string name="pref_camera_picturesize_entry_320x240">QVGA</string>
+    <string name="pref_camera_picturesize_entry_176x144">QCIF</string>
 
     <!-- Default picture quality setting. See
          pref_camera_jpegquality_entryvalues for possible values -->
@@ -152,8 +227,13 @@
 
     <!-- Settings screen, Focue mode dialog radio button choices -->
     <string name="pref_camera_focusmode_entry_auto">Auto</string>
-    <string name="pref_camera_focusmode_entry_infinity">Infinity</string>
+    <string name="pref_camera_focusmode_entry_normal">Normal</string>
     <string name="pref_camera_focusmode_entry_macro">Macro</string>
+    <string name="pref_camera_focusmode_entry_infinity">Off</string>
+    <string name="pref_camera_focusmode_entry_touch">Touch</string>
+
+    <!-- Toast shown when touch-to-focus is enabled -->
+    <string name="touch_focus_enabled">Touch the screen to focus the camera.</string>
 
     <!-- Default flash mode setting.-->
     <string name="pref_camera_flashmode_default" translatable="false">auto</string>
@@ -206,6 +286,18 @@
     <string name="pref_camera_coloreffect_entry_bluetint">Blue tint</string>
     <string name="pref_camera_coloreffect_entry_greentint">Green tint</string>
 
+    <!-- Settings screen, Select sharpness title -->
+    <string name="pref_camera_sharpness_title">Sharpness</string>
+
+    <!-- Settings screen, Select contrast title -->
+    <string name="pref_camera_contrast_title">Contrast</string>
+
+    <!-- Settings screen, Select saturation title -->
+    <string name="pref_camera_saturation_title">Saturation</string>
+
+    <!-- Settings screen, Select brightness title -->
+    <string name="pref_camera_brightness_title">Brightness</string>
+
     <!-- Default scene mode setting. -->
     <string name="pref_camera_scenemode_default" translatable="false">auto</string>
 
@@ -249,7 +341,6 @@
 
     <!-- Exposure settings in preference -->
     <string name="pref_exposure_title">Exposure</string>
-    <string name="pref_exposure_default" translatable="false">0</string>
 
     <!-- Framing grid settings in preference -->
 
@@ -305,4 +396,92 @@
 
     <string name="switch_to_camera_lable">Switch to camera</string>
     <string name="switch_to_video_lable">Switch to video</string>
+
+    <string name="switch_to_main_label">Switch to rear</string>
+    <string name="switch_to_secondary_label">Switch to front</string>
+
+     <!-- Default iso setting. Do not translate. -->
+     <string name="pref_camera_iso_default">auto</string>
+
+     <!-- Settings screen, Select Iso title -->
+     <string name="pref_camera_iso_title">Select ISO</string>
+
+     <!-- Settings screen, ISO dialog radio button choices -->
+     <string name="pref_camera_iso_entry_auto">Auto</string>
+     <string name="pref_camera_iso_entry_isodeblur">Deblur</string>
+     <string name="pref_camera_iso_entry_iso100">ISO100</string>
+     <string name="pref_camera_iso_entry_iso200">ISO200</string>
+     <string name="pref_camera_iso_entry_iso400">ISO400</string>
+     <string name="pref_camera_iso_entry_iso800">ISO800</string>
+     <string name="pref_camera_iso_entry_iso1250">ISO1250</string>
+	
+     <!-- ISO entry values. Do not translate. -->
+     <string name="pref_camera_iso_value_auto">auto</string>
+     <string name="pref_camera_iso_value_isodeblur">deblur</string>
+     <string name="pref_camera_iso_value_iso100">100</string>
+     <string name="pref_camera_iso_value_iso200">200</string>
+     <string name="pref_camera_iso_value_iso400">400</string>
+     <string name="pref_camera_iso_value_iso800">800</string>
+     <string name="pref_camera_iso_value_iso1250">1250</string>
+
+     <!-- Default auto lens shading setting. Do not translate. -->
+     <string name="pref_camera_lensshading_default">enable</string>
+
+     <!-- Settings screen, Select lens shading title -->
+     <string name="pref_camera_lensshading_title">Lens Shading</string>
+
+     <!-- Settings screen, lens shading radio button choices -->
+     <string name="pref_camera_lensshading_entry_enable">Enable</string>
+     <string name="pref_camera_lensshading_entry_disable">Disable</string>
+
+     <!-- Lens shading entry values. Do not translate. -->
+     <string name="pref_camera_lensshading_value_enable">enable</string>
+     <string name="pref_camera_lensshading_value_disable">disable</string>
+
+     <!-- Settings screen, Anti Banding title -->
+     <string name="pref_camera_antibanding_title">Anti Banding</string>
+
+     <!-- Default Anti Banding setting. -->
+     <string name="pref_camera_antibanding_default">Off</string>
+
+     <!-- Settings screen, Anti Banding entries -->
+     <string name="pref_camera_antibanding_entry_0">Off</string>
+     <string name="pref_camera_antibanding_entry_1">50 Hz</string>
+     <string name="pref_camera_antibanding_entry_2">60 Hz</string>
+     <string name="pref_camera_antibanding_entry_3">Auto</string>
+
+     <!-- Default auto exposure setting. Do not translate. -->
+     <string name="pref_camera_autoexposure_default">meter-average</string>
+
+     <!-- Settings screen, Select auto exposure title -->
+     <string name="pref_camera_autoexposure_title">Metering Mode</string>
+
+     <!-- Settings screen, auto exposure dialog radio button choices -->
+     <string name="pref_camera_autoexposure_entry_frameaverage">Frame Average</string>
+     <string name="pref_camera_autoexposure_entry_centerweighted">Center Weighted</string>
+     <string name="pref_camera_autoexposure_entry_spotmetering">Spot Metering</string>
+
+     <!-- Auto exposure entry values. Do not translate. -->
+     <string name="pref_camera_autoexposure_value_frameaverage">meter-average</string>
+     <string name="pref_camera_autoexposure_value_centerweighted">meter-center</string>
+     <string name="pref_camera_autoexposure_value_spotmetering">meter-spot</string>
+
+     <!-- Stable shot setting title -->
+     <string name="pref_camera_stableshot_title">Stable Shot</string>
+
+     <!-- Stable shot default. Do not translate. -->
+     <string name="pref_camera_stableshot_default">0</string>
+
+     <!-- Stable shot settings entries -->
+     <string name="pref_camera_stableshot_entry_0">Off</string>
+     <string name="pref_camera_stableshot_entry_1">1/2 Second</string>
+     <string name="pref_camera_stableshot_entry_2">1 Second</string>
+     <string name="pref_camera_stableshot_entry_3">2 Seconds</string>
+
+     <!-- Stable shot settings values (.5 second intervals). Do not translate. -->
+     <string name="pref_camera_stableshot_value_0">0</string>
+     <string name="pref_camera_stableshot_value_1">1</string>
+     <string name="pref_camera_stableshot_value_2">2</string>
+     <string name="pref_camera_stableshot_value_3">4</string>
+
 </resources>

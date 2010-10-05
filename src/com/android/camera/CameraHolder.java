@@ -19,6 +19,7 @@ package com.android.camera;
 import static com.android.camera.Util.Assert;
 
 import android.hardware.Camera.Parameters;
+import android.hardware.CameraSwitch;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -47,7 +48,9 @@ public class CameraHolder {
     private long mKeepBeforeTime = 0;  // Keep the Camera before this time.
     private final Handler mHandler;
     private int mUsers = 0;  // number of open() - number of release()
-
+    private String mCameraNode = CameraSwitch.SWITCH_CAMERA_MAIN;
+    private boolean mSwitchingMode = false;
+    
     // We store the camera parameters when we actually open the device,
     // so we can restore them in the subsequent open() requests by the user.
     // This prevents the parameters set by the Camera activity used by
@@ -95,9 +98,13 @@ public class CameraHolder {
     public synchronized android.hardware.Camera open()
             throws CameraHardwareException {
         Assert(mUsers == 0);
-        if (mCameraDevice == null) {
+        if (mCameraDevice == null || mSwitchingMode) {
             try {
-                mCameraDevice = android.hardware.Camera.open();
+                if (mCameraDevice != null) {
+                    mCameraDevice.release();
+                }
+                mCameraDevice = android.hardware.Camera.open(mCameraNode);
+                mSwitchingMode = false;
             } catch (RuntimeException e) {
                 Log.e(TAG, "fail to connect Camera", e);
                 throw new CameraHardwareException(e);
@@ -142,6 +149,11 @@ public class CameraHolder {
         releaseCamera();
     }
 
+    public synchronized android.hardware.Camera getCameraDevice() {
+        Assert(mCameraDevice != null);
+        return mCameraDevice;
+    }
+    
     private synchronized void releaseCamera() {
         Assert(mUsers == 0);
         Assert(mCameraDevice != null);
@@ -163,4 +175,16 @@ public class CameraHolder {
         // Keep the camera instance for 3 seconds.
         mKeepBeforeTime = System.currentTimeMillis() + 3000;
     }
+    
+    public synchronized void setCameraNode(String name) {
+        if (!mCameraNode.equals(name)) {
+            mSwitchingMode = true;
+        }
+        mCameraNode = name == null ? CameraSwitch.SWITCH_CAMERA_MAIN : name;
+    }
+    
+    public synchronized String getCameraNode() {
+        return mCameraNode;
+    }
+    
 }

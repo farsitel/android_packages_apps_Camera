@@ -17,6 +17,7 @@
 package com.android.camera.ui;
 
 import android.content.Context;
+import android.hardware.Camera.Parameters;
 
 import com.android.camera.CameraSettings;
 import com.android.camera.IconListPreference;
@@ -25,14 +26,13 @@ import com.android.camera.PreferenceGroup;
 
 public class CameraHeadUpDisplay extends HeadUpDisplay {
 
-    protected static final String TAG = "CamcoderHeadUpDisplay";
+    protected static final String TAG = "CameraHeadUpDisplay";
 
     private OtherSettingsIndicator mOtherSettings;
     private GpsIndicator mGpsIndicator;
-    private ZoomIndicator mZoomIndicator;
 
-    public CameraHeadUpDisplay(Context context) {
-        super(context);
+    public CameraHeadUpDisplay(Context context, Parameters params) {
+        super(context, params, params.isZoomSupported());
     }
 
     @Override
@@ -42,11 +42,15 @@ public class CameraHeadUpDisplay extends HeadUpDisplay {
 
         ListPreference prefs[] = getListPreferences(group,
                 CameraSettings.KEY_FOCUS_MODE,
-                CameraSettings.KEY_EXPOSURE,
                 CameraSettings.KEY_SCENE_MODE,
+                CameraSettings.KEY_COLOR_EFFECT,
+                CameraSettings.KEY_ISO,
+                CameraSettings.KEY_LENSSHADING,
+                CameraSettings.KEY_AUTOEXPOSURE,
+                CameraSettings.KEY_ANTIBANDING,
+                CameraSettings.KEY_STABLESHOT,
                 CameraSettings.KEY_PICTURE_SIZE,
-                CameraSettings.KEY_JPEG_QUALITY,
-                CameraSettings.KEY_COLOR_EFFECT);
+                CameraSettings.KEY_JPEG_QUALITY);
 
         mOtherSettings = new OtherSettingsIndicator(context, prefs);
         mOtherSettings.setOnRestorePreferencesClickedRunner(new Runnable() {
@@ -58,6 +62,11 @@ public class CameraHeadUpDisplay extends HeadUpDisplay {
         });
         mIndicatorBar.addComponent(mOtherSettings);
 
+        mSettingsIndicator = new SettingsIndicator(context, mParameters, mSharedPrefs);
+        if (mSettingsIndicator.isAvailable()) {
+            mIndicatorBar.addComponent(mSettingsIndicator);
+        }
+
         mGpsIndicator = new GpsIndicator(
                 context, group, (IconListPreference)
                 group.findPreference(CameraSettings.KEY_RECORD_LOCATION));
@@ -65,17 +74,12 @@ public class CameraHeadUpDisplay extends HeadUpDisplay {
 
         addIndicator(context, group, CameraSettings.KEY_WHITE_BALANCE);
         addIndicator(context, group, CameraSettings.KEY_FLASH_MODE);
+        
+        if (mZoomSupported) {
+            mZoomIndicator = new ZoomIndicator(context);
+            mIndicatorBar.addComponent(mZoomIndicator);
+        }
 
-        mZoomIndicator = new ZoomIndicator(context);
-        mIndicatorBar.addComponent(mZoomIndicator);
-    }
-
-    public void setZoomListener(ZoomController.ZoomListener listener) {
-        mZoomIndicator.setZoomListener(listener);
-    }
-
-    public void setZoomIndex(int index) {
-        mZoomIndicator.setZoomIndex(index);
     }
 
     public void setGpsHasSignal(final boolean hasSignal) {
@@ -91,7 +95,4 @@ public class CameraHeadUpDisplay extends HeadUpDisplay {
         }
     }
 
-    public void setZoomRatios(float[] zoomRatios) {
-        mZoomIndicator.setZoomRatios(zoomRatios);
-    }
 }
