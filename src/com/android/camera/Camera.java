@@ -25,6 +25,7 @@ import com.android.camera.ui.HeadUpDisplay;
 import com.android.camera.ui.ZoomController;
 
 import android.app.Activity;
+import android.app.backup.BackupManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ContentProviderClient;
@@ -213,7 +214,8 @@ public class Camera extends BaseCamera {
                 long now = System.currentTimeMillis();
 
                 // 2 second interval for measuring stability
-                if (stable && canTakePicture() && (now - mLastStabilityChange) > 120) {
+                if (!mHeadUpDisplay.isActive() && stable && canTakePicture()
+                        && (now - mLastStabilityChange) > 120) {
                     Log.d(TAG, "** Camera stable **");
                     mLastStabilityChange = now;
                     mHandler.sendEmptyMessage(AUTOFOCUS_FAST);
@@ -2013,6 +2015,8 @@ public class Camera extends BaseCamera {
         }
 
         setCameraParametersWhenIdle(UPDATE_PARAM_PREFERENCE);
+
+        BackupManager.dataChanged(this.getPackageName());
     }
 
     private boolean getQuickCaptureSettings() {
