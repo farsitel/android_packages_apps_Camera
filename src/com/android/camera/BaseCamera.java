@@ -327,7 +327,7 @@ public abstract class BaseCamera extends NoSearchActivity implements View.OnClic
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
             if (mPausing || !mPreviewing || mHeadUpDisplay == null || mFocusing
-                    || !"touch".equals(mFocusMode)) {
+                    || !"touch".equals(mFocusMode) || mHeadUpDisplay.isActive()) {
                 return false;
             }
 
@@ -378,7 +378,6 @@ public abstract class BaseCamera extends NoSearchActivity implements View.OnClic
 
     protected android.hardware.Camera.AutoFocusCallback getAutoFocusCallback() {
         return new android.hardware.Camera.AutoFocusCallback() {
-            @Override
             public void onAutoFocus(boolean success, Camera camera) {
                 if (mFocusing) {
                     mFocusRectangle.showSuccess();
