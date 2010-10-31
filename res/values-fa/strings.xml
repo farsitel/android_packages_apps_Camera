@@ -102,8 +102,6 @@
     <!-- Settings screen, setting title text -->
     <string name="pref_camera_recordlocation_title">مکان ذخیره‌سازی</string>
 
-    <string name="pref_camera_recordlocation_default" translatable="false">none</string>
-
     <!-- Settings screen, Record location dialog choices -->
     <string name="pref_camera_recordlocation_entry_off">خاموش</string>
     <string name="pref_camera_recordlocation_entry_on">روشن</string>
@@ -111,14 +109,12 @@
 
     <!-- The Video length settings in preference -->
     <string name="pref_video_quality_title">کیفیت ویدئو</string>
-    <string name="pref_video_quality_default" translatable="false">high</string>
     <string name="pref_video_quality_entry_high">بالا (۳۰ دقیقه)</string>
     <string name="pref_video_quality_entry_low">پایین (۳۰ دقیقه)</string>
     <string name="pref_video_quality_entry_mms">‏MMS (پایین، ۳۰ ثانیه)</string>
     <string name="pref_video_quality_entry_youtube">‏YouTube (بالا، ۱۰ دقیقه)</string>
     <string name="pref_video_quality_entry_custom">دلخواه</string>
     <!-- Default video quality setting. A numerical value. -->
-    <string name="pref_camera_videosize_default" translatable="false">qvga</string>
 
     <!-- Settings screen, Video quality title -->
     <string name="pref_camera_videosize_title">کیفیت ویدئو</string>
@@ -134,10 +130,6 @@
     <string name="pref_camera_videosize_entry_7">QCIF</string>
 
 
-
-    <!-- Default video encoder setting. A numerical value. -->
-    <string name="pref_camera_videoencoder_default" translatable="false">m4v</string>
-
     <!-- Settings screen, Video encoder title -->
     <string name="pref_camera_videoencoder_title">کدک ویدئو</string>
 
@@ -149,9 +141,6 @@
     <!-- Settings screen, Video encoder dialog title -->
     <string name="pref_camera_videoencoder_dialogtitle">کدک ویدئو</string>
 
-    <!-- Default audio encoder setting. A numerical value. -->
-    <string name="pref_camera_audioencoder_default" translatable="false">amrnb</string>
-
     <!-- Settings screen, Audio encoder title -->
     <string name="pref_camera_audioencoder_title">کدک صدا</string>
 
@@ -161,9 +150,6 @@
     <string name="pref_camera_audioencoder_entry_2">EVRC</string>
     <string name="pref_camera_audioencoder_entry_3">AAC</string>
 
-
-    <!-- Default video duration setting. A numerical value.-->
-    <string name="pref_camera_video_duration_default" translatable="false">10</string>
 
     <!-- Settings screen, Video duration title -->
     <string name="pref_camera_video_duration_title">مدت‌زمان ویدئو</string>
@@ -206,10 +192,6 @@
     <string name="pref_camera_picturesize_entry_320x240">QVGA</string>
     <string name="pref_camera_picturesize_entry_176x144">QCIF</string>
 
-    <!-- Default picture quality setting. See
-         pref_camera_jpegquality_entryvalues for possible values -->
-    <string name="pref_camera_jpegquality_default" translatable="false">superfine</string>
-
     <!-- Settings screen, Picture quality title -->
     <string name="pref_camera_jpegquality_title">کیفیت تصویر</string>
 
@@ -217,9 +199,6 @@
     <string name="pref_camera_jpegquality_entry_superfine">خیلی خوب</string>
     <string name="pref_camera_jpegquality_entry_fine">خوب</string>
     <string name="pref_camera_jpegquality_entry_normal">معمولی</string>
-
-    <!-- Default focus mode setting.-->
-    <string name="pref_camera_focusmode_default" translatable="false">auto</string>
 
     <!-- Settings screen, Focus mode title -->
     <string name="pref_camera_focusmode_title">حالت فوکوس</string>
@@ -234,12 +213,6 @@
     <!-- Toast shown when touch-to-focus is enabled -->
     <string name="touch_focus_enabled">برای فوکوس کردن دوربین صفحهٔ نمایش را لمس کنید.</string>
 
-    <!-- Default flash mode setting.-->
-    <string name="pref_camera_flashmode_default" translatable="false">auto</string>
-
-    <!-- Value for flash off setting-->
-    <string name="pref_camera_flashmode_no_flash" translatable="false">no_flash</string>
-
     <!-- Settings screen, Flash mode title -->
     <string name="pref_camera_flashmode_title">فلاش</string>
 
@@ -247,12 +220,6 @@
     <string name="pref_camera_flashmode_entry_auto">خودکار</string>
     <string name="pref_camera_flashmode_entry_on">روشن</string>
     <string name="pref_camera_flashmode_entry_off">خاموش</string>
-
-    <!-- Default videocamera flash mode setting.-->
-    <string name="pref_camera_video_flashmode_default" translatable="false">off</string>
-
-    <!-- Default white balance setting. -->
-    <string name="pref_camera_whitebalance_default" translatable="false">auto</string>
 
     <!-- Settings screen, white balance title -->
     <string name="pref_camera_whitebalance_title">تعادل رنگ سفید</string>
@@ -263,9 +230,6 @@
     <string name="pref_camera_whitebalance_entry_daylight">نور روز</string>
     <string name="pref_camera_whitebalance_entry_fluorescent">نور فلورسان</string>
     <string name="pref_camera_whitebalance_entry_cloudy">ابری</string>
-
-    <!-- Default color effect setting. -->
-    <string name="pref_camera_coloreffect_default" translatable="false">none</string>
 
     <!-- Settings screen, Select Color effect title -->
     <string name="pref_camera_coloreffect_title">جلوهٔ رنگ</string>
@@ -297,9 +261,6 @@
     <!-- Settings screen, Select brightness title -->
     <string name="pref_camera_brightness_title">روشنایی</string>
 
-    <!-- Default scene mode setting. -->
-    <string name="pref_camera_scenemode_default" translatable="false">auto</string>
-
     <!-- Settings screen, Select Scene mode -->
     <string name="pref_camera_scenemode_title">حالت صحنه</string>
 
@@ -330,7 +291,6 @@
 
     <!-- Settings menu, enable quick capture mode or not -->
     <string name="pref_camera_quickcapture_title">عکس‌برداری سریع</string>
-    <string name="pref_camera_quickcapture_default" translatable="false">off</string>
     <string name="pref_camera_quickcapture_entry_on">روشن</string>
     <string name="pref_camera_quickcapture_entry_off">خاموش</string>
 
@@ -341,42 +301,8 @@
     <!-- Exposure settings in preference -->
     <string name="pref_exposure_title">نمایش</string>
 
-    <!-- Framing grid settings in preference -->
-
-    <!-- Message to show when there's no lat/lng information in the image -->
-    <!-- Title of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-    <!-- Label in message of Details dialog  -->
-
-    <!-- Used to format image dimensions in Details dialog. e.g. 64 x 64 -->
-    <!-- Used to format short video duration in Details dialog. minutes:seconds e.g. 00:30 -->
-    <!-- Used to format video duration in Details dialog. hours:minutes:seconds e.g. 0:21:30 -->
-    <!-- Unit of measure in the Details dialog frames per second. e.g. 20 fps -->
-    <!-- Unit of measure in the Details dialog K bits per second. e.g. 192 Kbps -->
-    <!-- Unit of measure in the Details dialog M bits per second. e.g. 2.3 Mbps -->
     <!-- Details dialog "OK" button. Dismisses dialog. -->
     <string name="details_ok">خُب</string>
-
-    <!-- Displayed in the title of the dialog for things to do with a picture that
-         is to be sent to another application: -->
-
-    <!-- Displayed in the title of the dialog for things to do with a picture that
-         is to be "set as" (e.g. set as contact photo or set as wallpaper) -->
-
-    <!-- Displayed in the title of the dialog for things to do with a video that
-         is to be sent to another application. -->
 
     <!-- Low-memory dialog message -->
     <string name="spaceIsLow_content">کارت حافظهٔ شما در حال پر شدن است. یا کیفیت عکس را تغییر دهید یا تعدادی عکس از گالری حذف کنید.</string>
