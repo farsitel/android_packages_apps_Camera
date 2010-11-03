@@ -28,7 +28,6 @@
                 camera:entryValues="@array/pref_camera_flashmode_entryvalues" />
         <ListPreference
                 camera:key="pref_camera_exposure_key"
-                camera:defaultValue="@string/pref_exposure_default"
                 camera:title="@string/pref_exposure_title" />
         <ListPreference
                 camera:key="pref_camera_scenemode_key"
@@ -81,5 +80,45 @@
                 camera:title="@string/pref_camera_quickcapture_title"
                 camera:entries="@array/pref_camera_quickcapture_entries"
                 camera:entryValues="@array/pref_camera_quickcapture_entryvalues" />
+        <ListPreference
+                 camera:key="pref_camera_iso_key"
+                 camera:defaultValue="@string/pref_camera_iso_default"
+                 camera:title="@string/pref_camera_iso_title"
+                 camera:entries="@array/pref_camera_iso_entries"
+                 camera:entryValues="@array/pref_camera_iso_entryvalues" />
+         <ListPreference
+                 camera:key="pref_camera_lensshading_key"
+                 camera:defaultValue="@string/pref_camera_lensshading_default"
+                 camera:title="@string/pref_camera_lensshading_title"
+                 camera:entries="@array/pref_camera_lensshading_entries"
+                 camera:entryValues="@array/pref_camera_lensshading_entryvalues" />
+         <ListPreference
+                 camera:key="pref_camera_antibanding_key"
+                 camera:defaultValue="@string/pref_camera_antibanding_default"
+                 camera:title="@string/pref_camera_antibanding_title"
+                 camera:entries="@array/pref_camera_antibanding_entries"
+                 camera:entryValues="@array/pref_camera_antibanding_entryvalues" />
+         <ListPreference
+                camera:key="pref_camera_autoexposure_key"
+                camera:defaultValue="@string/pref_camera_autoexposure_default"
+                camera:title="@string/pref_camera_autoexposure_title"
+                camera:entries="@array/pref_camera_autoexposure_entries"
+                camera:entryValues="@array/pref_camera_autoexposure_entryvalues" />
+         <ListPreference
+                camera:key="pref_camera_sharpness_key"
+                camera:title="@string/pref_camera_sharpness_title" />
+        <ListPreference
+                camera:key="pref_camera_contrast_key"
+                camera:title="@string/pref_camera_contrast_title" />
+        <ListPreference
+                camera:key="pref_camera_saturation_key"
+                camera:title="@string/pref_camera_saturation_title" />
+        <ListPreference
+                camera:key="pref_camera_stableshot_key"
+                camera:defaultValue="@string/pref_camera_stableshot_default"
+                camera:title="@string/pref_camera_stableshot_title"
+                camera:entries="@array/pref_camera_stableshot_entries"
+                camera:entryValues="@array/pref_camera_stableshot_entryvalues" />
+
     </PreferenceGroup>
 </PreferenceGroup>

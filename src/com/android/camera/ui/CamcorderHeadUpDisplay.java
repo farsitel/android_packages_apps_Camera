@@ -17,6 +17,7 @@
 package com.android.camera.ui;
 
 import android.content.Context;
+import android.hardware.Camera.Parameters;
 
 import com.android.camera.CameraSettings;
 import com.android.camera.ListPreference;
@@ -27,9 +28,10 @@ public class CamcorderHeadUpDisplay extends HeadUpDisplay {
     protected static final String TAG = "CamcorderHeadUpDisplay";
 
     private OtherSettingsIndicator mOtherSettings;
+    private BasicIndicator mVideoQualitySettings;
 
-    public CamcorderHeadUpDisplay(Context context) {
-        super(context);
+    public CamcorderHeadUpDisplay(Context context, Parameters params) {
+        super(context, params, CameraSettings.isVideoZoomSupported(params));
     }
 
     @Override
@@ -38,12 +40,16 @@ public class CamcorderHeadUpDisplay extends HeadUpDisplay {
         super.initializeIndicatorBar(context, group);
 
         ListPreference[] prefs = getListPreferences(group,
-                CameraSettings.KEY_FOCUS_MODE,
-                CameraSettings.KEY_EXPOSURE,
+                CameraSettings.KEY_VIDEOCAMERA_FOCUS_MODE,
                 CameraSettings.KEY_SCENE_MODE,
                 CameraSettings.KEY_PICTURE_SIZE,
                 CameraSettings.KEY_JPEG_QUALITY,
-                CameraSettings.KEY_COLOR_EFFECT);
+                CameraSettings.KEY_COLOR_EFFECT,
+                CameraSettings.KEY_AUTOEXPOSURE,
+                CameraSettings.KEY_VIDEO_SIZE,
+                CameraSettings.KEY_VIDEO_ENCODER,
+                CameraSettings.KEY_AUDIO_ENCODER,
+                CameraSettings.KEY_VIDEO_DURATION);
 
         mOtherSettings = new OtherSettingsIndicator(context, prefs);
         mOtherSettings.setOnRestorePreferencesClickedRunner(new Runnable() {
@@ -55,8 +61,22 @@ public class CamcorderHeadUpDisplay extends HeadUpDisplay {
         });
         mIndicatorBar.addComponent(mOtherSettings);
 
+        mSettingsIndicator = new SettingsIndicator(context, mParameters, mSharedPrefs);
+        if (mSettingsIndicator.isAvailable()) {
+            mIndicatorBar.addComponent(mSettingsIndicator);
+        }
+
         addIndicator(context, group, CameraSettings.KEY_WHITE_BALANCE);
         addIndicator(context, group, CameraSettings.KEY_VIDEOCAMERA_FLASH_MODE);
-        addIndicator(context, group, CameraSettings.KEY_VIDEO_QUALITY);
+        mVideoQualitySettings = addIndicator(context, group, CameraSettings.KEY_VIDEO_QUALITY);
+
+        if (mZoomSupported) {
+            mZoomIndicator = new ZoomIndicator(context);
+            mIndicatorBar.addComponent(mZoomIndicator);
+        }
+    }
+
+    public void setVideoQualityControlsEnabled(boolean enabled) {
+        mVideoQualitySettings.setEnabled(enabled);
     }
 }

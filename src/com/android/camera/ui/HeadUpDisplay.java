@@ -30,13 +30,13 @@ import android.graphics.Rect;
 import android.hardware.Camera.Parameters;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View.MeasureSpec;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 
+import com.android.camera.CameraHolder;
 import com.android.camera.CameraSettings;
 import com.android.camera.IconListPreference;
 import com.android.camera.ListPreference;
@@ -70,7 +70,9 @@ public class HeadUpDisplay extends GLView {
 
     protected IndicatorBar mIndicatorBar;
 
-    private SharedPreferences mSharedPrefs;
+    protected Parameters mParameters;
+    protected SharedPreferences mSharedPrefs;
+
     private PreferenceGroup mPreferenceGroup;
 
     private PopupWindow mPopupWindow;
@@ -80,6 +82,11 @@ public class HeadUpDisplay extends GLView {
     private boolean mEnabled = true;
 
     protected Listener mListener;
+
+    protected ZoomIndicator mZoomIndicator;
+    protected boolean mZoomSupported;
+
+    protected SettingsIndicator mSettingsIndicator;
 
     private Handler mHandler;
 
@@ -93,7 +100,9 @@ public class HeadUpDisplay extends GLView {
         }
     };
 
-    public HeadUpDisplay(Context context) {
+    public HeadUpDisplay(Context context, Parameters params, boolean zoomSupported) {
+        mZoomSupported = zoomSupported;
+        mParameters = params;
         initializeStaticVariables(context);
     }
 
@@ -192,7 +201,7 @@ public class HeadUpDisplay extends GLView {
 
     public void initialize(Context context, PreferenceGroup preferenceGroup) {
         mPreferenceGroup = preferenceGroup;
-        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        mSharedPrefs = context.getSharedPreferences(CameraHolder.instance().getCameraNode(), Context.MODE_PRIVATE);
         mSharedPrefs.registerOnSharedPreferenceChangeListener(
                 mSharedPreferenceChangeListener);
         initializeIndicatorBar(context, preferenceGroup);
@@ -427,5 +436,27 @@ public class HeadUpDisplay extends GLView {
     public void reloadPreferences() {
         mPreferenceGroup.reloadValue();
         mIndicatorBar.reloadPreferences();
+    }
+
+    public void setZoomListener(ZoomController.ZoomListener listener) {
+        if (mZoomSupported) {
+            mZoomIndicator.setZoomListener(listener);
+        }
+    }
+
+    public void setZoomIndex(int index) {
+        if (mZoomSupported) {
+            mZoomIndicator.setZoomIndex(index);
+        }
+    }
+
+    public void setZoomRatios(float[] zoomRatios) {
+        if (mZoomSupported) {
+            mZoomIndicator.setZoomRatios(zoomRatios);
+        }
+    }
+
+    public boolean isActive() {
+        return mIndicatorBar.isActivated();
     }
 }

@@ -22,6 +22,7 @@ import com.android.camera.ui.CamcorderHeadUpDisplay;
 import com.android.camera.ui.GLRootView;
 import com.android.camera.ui.GLView;
 import com.android.camera.ui.HeadUpDisplay;
+import com.android.camera.ui.ZoomController;
 
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -30,14 +31,17 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.Size;
+import android.hardware.CameraSwitch;
 import android.media.CamcorderProfile;
+import android.media.EncoderCapabilities;
+import android.media.EncoderCapabilities.AudioEncoderCap;
+import android.media.EncoderCapabilities.VideoEncoderCap;
 import android.media.MediaRecorder;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
@@ -48,22 +52,22 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.StatFs;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.provider.MediaStore.Video;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
+import android.view.OrientationEventListener;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.FrameLayout;
@@ -77,16 +81,18 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.StringTokenizer;
+
 
 /**
  * The Camcorder activity.
  */
-public class VideoCamera extends NoSearchActivity
-        implements View.OnClickListener,
-        ShutterButton.OnShutterButtonListener, SurfaceHolder.Callback,
+public class VideoCamera extends BaseCamera implements
         MediaRecorder.OnErrorListener, MediaRecorder.OnInfoListener,
-        Switcher.OnSwitchListener, PreviewFrameLayout.OnSizeChangedListener {
+        PreviewFrameLayout.OnSizeChangedListener {
 
     private static final String TAG = "videocamera";
 
@@ -94,8 +100,9 @@ public class VideoCamera extends NoSearchActivity
     private static final int CLEAR_SCREEN_DELAY = 4;
     private static final int UPDATE_RECORD_TIME = 5;
     private static final int ENABLE_SHUTTER_BUTTON = 6;
+    private static final int RELOAD_HUD = 7;
 
-    private static final int SCREEN_DELAY = 2 * 60 * 1000;
+    private static final int SCREEN_DELAY = 1000;
 
     // The brightness settings used when it is set to automatic in the system.
     // The reason why it is set to 0.7 is just because 1.0 is too bright.
@@ -122,14 +129,13 @@ public class VideoCamera extends NoSearchActivity
     private final static String EXTRA_QUICK_CAPTURE =
             "android.intent.extra.quickCapture";
 
-    private SharedPreferences mPreferences;
+    private OrientationEventListener mOrientationListener;
+    private int mLastOrientation = 0;  // No rotation (landscape) by default.
 
     private PreviewFrameLayout mPreviewFrameLayout;
-    private SurfaceView mVideoPreview;
     private SurfaceHolder mSurfaceHolder = null;
     private ImageView mVideoFrame;
     private GLRootView mGLRootView;
-    private CamcorderHeadUpDisplay mHeadUpDisplay;
 
     private boolean mIsVideoCaptureIntent;
     private boolean mQuickCapture;
@@ -141,7 +147,6 @@ public class VideoCamera extends NoSearchActivity
 
     private int mStorageStatus = STORAGE_STATUS_OK;
 
-    private MediaRecorder mMediaRecorder;
     private boolean mMediaRecorderRecording = false;
     private long mRecordingStartTime;
     // The video file that the hardware camera is about to record into
@@ -156,12 +161,111 @@ public class VideoCamera extends NoSearchActivity
     private ContentValues mCurrentVideoValues;
 
     private CamcorderProfile mProfile;
+    private int mVideoEncoder;
+    private int mAudioEncoder;
+    private int mVideoWidth;
+    private int mVideoHeight;
+    private int mVideoBitrate;
+    private String mOutputFormat = "3gp";
+    private int mVideoFps = 30;
+
+
+    //
+    // DefaultHashMap is a HashMap which returns a default value if the specified
+    // key is not found.
+    //
+    @SuppressWarnings("serial")
+
+    static class DefaultHashMap<K, V> extends HashMap<K, V> {
+        private V mDefaultValue;
+
+        public void putDefault(V defaultValue) {
+            mDefaultValue = defaultValue;
+        }
+
+        @Override
+        public V get(Object key) {
+            V value = super.get(key);
+            return (value == null) ? mDefaultValue : value;
+        }
+
+        public K getKey(V toCheck) {
+            Iterator<K> it = this.keySet().iterator();
+            V val;
+            K key;
+            while(it.hasNext()) {
+                key = it.next();
+                val = this.get(key);
+                if (val.equals(toCheck)) {
+                    return key;
+                }
+            }
+        return null;
+        }
+    }
+
+
+    static final DefaultHashMap<String, Integer>
+            OUTPUT_FORMAT_TABLE = new DefaultHashMap<String, Integer>();
+    static final DefaultHashMap<String, Integer>
+            VIDEO_ENCODER_TABLE = new DefaultHashMap<String, Integer>();
+    static final DefaultHashMap<String, Integer>
+            AUDIO_ENCODER_TABLE = new DefaultHashMap<String, Integer>();
+    static final DefaultHashMap<String, Integer>
+            VIDEOQUALITY_BITRATE_TABLE = new DefaultHashMap<String, Integer>();
+
+    static {
+        OUTPUT_FORMAT_TABLE.put("3gp", MediaRecorder.OutputFormat.THREE_GPP);
+        OUTPUT_FORMAT_TABLE.put("mp4", MediaRecorder.OutputFormat.MPEG_4);
+        OUTPUT_FORMAT_TABLE.putDefault(MediaRecorder.OutputFormat.DEFAULT);
+
+        for (VideoEncoderCap encoder : EncoderCapabilities.getVideoEncoders()) {
+            switch (encoder.mCodec) {
+                case MediaRecorder.VideoEncoder.H263:
+                    VIDEO_ENCODER_TABLE.put("h263", MediaRecorder.VideoEncoder.H263);
+                    break;
+                case MediaRecorder.VideoEncoder.H264:
+                    VIDEO_ENCODER_TABLE.put("h264", MediaRecorder.VideoEncoder.H264);
+                    break;
+                case MediaRecorder.VideoEncoder.MPEG_4_SP:
+                    VIDEO_ENCODER_TABLE.put("m4v", MediaRecorder.VideoEncoder.MPEG_4_SP);
+                    break;
+            }
+        }
+        VIDEO_ENCODER_TABLE.putDefault(MediaRecorder.VideoEncoder.DEFAULT);
+
+        for (AudioEncoderCap encoder : EncoderCapabilities.getAudioEncoders()) {
+            switch (encoder.mCodec) {
+                case MediaRecorder.AudioEncoder.AMR_NB:
+                    AUDIO_ENCODER_TABLE.put("amrnb", MediaRecorder.AudioEncoder.AMR_NB);
+                    break;
+                case MediaRecorder.AudioEncoder.AAC:
+                    AUDIO_ENCODER_TABLE.put("aac", MediaRecorder.AudioEncoder.AAC);
+                    break;
+            }
+        }
+        AUDIO_ENCODER_TABLE.putDefault(MediaRecorder.AudioEncoder.DEFAULT);
+
+	/*
+        AUDIO_ENCODER_TABLE.put("amrwb", MediaRecorder.AudioEncoder.AMR_WB);
+        AUDIO_ENCODER_TABLE.put("qcelp", MediaRecorder.AudioEncoder.QCELP);
+        AUDIO_ENCODER_TABLE.put("evrc", MediaRecorder.AudioEncoder.EVRC);
+        AUDIO_ENCODER_TABLE.put("aacplus", MediaRecorder.AudioEncoder.AAC_PLUS);
+        AUDIO_ENCODER_TABLE.put("eaacplus", MediaRecorder.AudioEncoder.EAAC_PLUS);
+	*/
+
+        VIDEOQUALITY_BITRATE_TABLE.put("1280x720", 6000000);
+        VIDEOQUALITY_BITRATE_TABLE.put("720x480",  3000000);
+        VIDEOQUALITY_BITRATE_TABLE.put("800x480",  3000000);
+        VIDEOQUALITY_BITRATE_TABLE.put("640x480",  1600000);
+        VIDEOQUALITY_BITRATE_TABLE.put("352x288",  360000);
+        VIDEOQUALITY_BITRATE_TABLE.put("320x240",  320000);
+        VIDEOQUALITY_BITRATE_TABLE.put("176x144",  192000);
+        VIDEOQUALITY_BITRATE_TABLE.putDefault(320000);
+    }
 
     // The video duration limit. 0 menas no limit.
     private int mMaxVideoDurationInMs;
-
-    boolean mPausing = false;
-    boolean mPreviewing = false; // True if preview is started.
 
     private ContentResolver mContentResolver;
 
@@ -170,10 +274,11 @@ public class VideoCamera extends NoSearchActivity
     private Switcher mSwitcher;
     private boolean mRecordingTimeCountsDown = false;
 
+    private long mLastStabilityChange = 0;
+
     private final ArrayList<MenuItem> mGalleryItems = new ArrayList<MenuItem>();
 
     private final Handler mHandler = new MainHandler();
-    private Parameters mParameters;
 
     // This Handler is used to post message back onto the main thread of the
     // application
@@ -202,12 +307,39 @@ public class VideoCamera extends NoSearchActivity
                     break;
                 }
 
+                case RELOAD_HUD: {
+                    if (mHeadUpDisplay != null) {
+                        finalizeHeadUpDisplay();
+                        initializeHeadUpDisplay();
+                    }
+                    break;
+                }
                 default:
                     Log.v(TAG, "Unhandled message: " + msg.what);
                     break;
             }
         }
     }
+
+    private StabilityChangeListener mStabilityChangeListener = new StabilityChangeListener() {
+        public void onStabilityChanged(boolean stable) {
+            long now = System.currentTimeMillis();
+
+            // 2 second interval for measuring stability
+            if (!mHeadUpDisplay.isActive() && stable
+                    && (now - mLastStabilityChange) > 120) {
+                Log.d(TAG, "** Camera stable **");
+                mLastStabilityChange = now;
+                if (mMediaRecorder != null) {
+                    mMediaRecorder.autoFocusCamera();
+                }
+                mFocusRectangle.showSuccess();
+            } else if (!stable) {
+                mFocusRectangle.clear();
+            }
+        }
+
+    };
 
     private BroadcastReceiver mReceiver = null;
 
@@ -220,6 +352,10 @@ public class VideoCamera extends NoSearchActivity
                 stopVideoRecording();
             } else if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
                 updateAndShowStorageHint(true);
+		if(mMediaRecorder != null)
+			releaseMediaRecorder();
+		if(mCameraVideoFilename != null)
+			cleanupEmptyFile();
                 initializeRecorder();
             } else if (action.equals(Intent.ACTION_MEDIA_UNMOUNTED)) {
                 // SD card unavailable
@@ -265,10 +401,39 @@ public class VideoCamera extends NoSearchActivity
             win.setAttributes(winParams);
         }
 
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        mPreferences = getSharedPreferences(CameraHolder.instance().getCameraNode(), Context.MODE_PRIVATE);
         CameraSettings.upgradePreferences(mPreferences);
 
         readVideoPreferences();
+
+        // Create orientation listenter. This should be done first because it
+        // takes some time to get first orientation.
+        mOrientationListener = new OrientationEventListener(VideoCamera.this) {
+            @Override
+            public void onOrientationChanged(int orientation) {
+                // We keep the last known orientation. So if the user
+                // first orient the camera then point the camera to
+                if (orientation != ORIENTATION_UNKNOWN) {
+                    orientation += 90;
+                }
+                orientation = ImageManager.roundOrientation(orientation);
+                if (orientation != mLastOrientation) {
+                    mLastOrientation = orientation;
+                    if (!mIsVideoCaptureIntent) {
+                        setOrientationIndicator(mLastOrientation);
+                    }
+
+                    if (mGLRootView != null) {
+                        mGLRootView.queueEvent(new Runnable() {
+                            public void run() {
+                                mHeadUpDisplay.setOrientation(mLastOrientation);
+                            }
+                        });
+                    }
+                }
+            }
+        };
+        mOrientationListener.enable();
 
         /*
          * To reduce startup time, we start the preview in another thread.
@@ -301,13 +466,14 @@ public class VideoCamera extends NoSearchActivity
         mPreviewFrameLayout.setOnSizeChangedListener(this);
         resizeForPreviewAspectRatio();
 
-        mVideoPreview = (SurfaceView) findViewById(R.id.camera_preview);
+        mSurfaceView = (SurfaceView) findViewById(R.id.camera_preview);
         mVideoFrame = (ImageView) findViewById(R.id.video_frame);
-
+        mFocusRectangle = (FocusRectangle) findViewById(R.id.focus_rectangle);
+        
         // don't set mSurfaceHolder here. We have it set ONLY within
         // surfaceCreated / surfaceDestroyed, other parts of the code
         // assume that when it is set, the surface is also set.
-        SurfaceHolder holder = mVideoPreview.getHolder();
+        SurfaceHolder holder = mSurfaceView.getHolder();
         holder.addCallback(this);
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
@@ -356,6 +522,46 @@ public class VideoCamera extends NoSearchActivity
         } catch (InterruptedException ex) {
             // ignore
         }
+
+        initializeZoom();
+        initializeTouchFocus();
+        setStabilityChangeListener(mStabilityChangeListener);
+    }
+
+    private void overrideHudSettings(final String videoEncoder,
+            final String audioEncoder, final String videoDuration, final String videoSize) {
+            if (mHeadUpDisplay != null && mGLRootView != null) {
+            mGLRootView.queueEvent(new Runnable() {
+            public void run() {
+                mHeadUpDisplay.overrideSettings(
+                       CameraSettings.KEY_VIDEO_ENCODER, videoEncoder);
+                mHeadUpDisplay.overrideSettings(
+                        CameraSettings.KEY_AUDIO_ENCODER, audioEncoder);
+                mHeadUpDisplay.overrideSettings(
+                        CameraSettings.KEY_VIDEO_DURATION, videoDuration);
+                mHeadUpDisplay.overrideSettings(
+                        CameraSettings.KEY_VIDEO_SIZE, videoSize);
+            }});
+          }
+    }
+
+    private void updateProfileInHud() {
+        String quality = mPreferences.getString(
+                CameraSettings.KEY_VIDEO_QUALITY,
+                CameraSettings.DEFAULT_VIDEO_QUALITY_VALUE);
+        if(!"custom".equalsIgnoreCase(quality)){
+            String videoEncoder = VIDEO_ENCODER_TABLE.getKey(mProfile.videoCodec);
+            String audioEncoder = AUDIO_ENCODER_TABLE.getKey(mProfile.audioCodec);
+            String videoSize = mProfile.videoFrameWidth + "x" + mProfile.videoFrameHeight;
+            int videoDuration = mMaxVideoDurationInMs / 1000;
+            if(videoDuration >= 60)
+                videoDuration = videoDuration / 60;
+            else
+                videoDuration = -1;
+            overrideHudSettings(videoEncoder, audioEncoder, String.valueOf(videoDuration), videoSize);
+       } else {
+            overrideHudSettings(null, null, null, null);
+       }
     }
 
     private void changeHeadUpDisplayState() {
@@ -373,12 +579,12 @@ public class VideoCamera extends NoSearchActivity
         }
     }
 
-    private void initializeHeadUpDisplay() {
+    private synchronized void initializeHeadUpDisplay() {
         FrameLayout frame = (FrameLayout) findViewById(R.id.frame);
         mGLRootView = new GLRootView(this);
         frame.addView(mGLRootView);
 
-        mHeadUpDisplay = new CamcorderHeadUpDisplay(this);
+        mHeadUpDisplay = new CamcorderHeadUpDisplay(this, mParameters);
         CameraSettings settings = new CameraSettings(this, mParameters);
 
         PreferenceGroup group =
@@ -389,12 +595,38 @@ public class VideoCamera extends NoSearchActivity
         mHeadUpDisplay.initialize(this, group);
         mGLRootView.setContentPane(mHeadUpDisplay);
         mHeadUpDisplay.setListener(new MyHeadUpDisplayListener());
+        mHeadUpDisplay.setOrientation(mLastOrientation);
+
+        if (mParameters.isZoomSupported()) {
+            mHeadUpDisplay.setZoomRatios(getZoomRatios());
+            mHeadUpDisplay.setZoomIndex(mZoomValue);
+            mHeadUpDisplay.setZoomListener(new ZoomController.ZoomListener() {
+                public void onZoomChanged(
+                        final int index, float ratio, boolean isMoving) {
+                    mHandler.post(new Runnable() {
+                        public void run() {
+                            onZoomValueChanged(index);
+                        }
+                    });
+                }
+            });
+        }
+        updateProfileInHud();
     }
 
     private void finalizeHeadUpDisplay() {
         mHeadUpDisplay.collapse();
         ((ViewGroup) mGLRootView.getParent()).removeView(mGLRootView);
         mGLRootView = null;
+    }
+
+    private void setOrientationIndicator(int degree) {
+        ((RotateImageView) findViewById(
+                R.id.review_thumbnail)).setDegree(degree);
+        ((RotateImageView) findViewById(
+                R.id.camera_switch_icon)).setDegree(degree);
+        ((RotateImageView) findViewById(
+                R.id.video_switch_icon)).setDegree(degree);
     }
 
     @Override
@@ -439,6 +671,7 @@ public class VideoCamera extends NoSearchActivity
     }
 
     private void onStopVideoRecording(boolean valid) {
+        ((CamcorderHeadUpDisplay)mHeadUpDisplay).setVideoQualityControlsEnabled(true);
         if (mIsVideoCaptureIntent) {
             if (mQuickCapture) {
                 stopVideoRecordingAndReturn(valid);
@@ -447,7 +680,7 @@ public class VideoCamera extends NoSearchActivity
             }
         } else {
             stopVideoRecordingAndGetThumbnail();
-            initializeRecorder();
+            mHandler.sendEmptyMessage(INIT_RECORDER);
         }
     }
 
@@ -519,44 +752,109 @@ public class VideoCamera extends NoSearchActivity
     private void readVideoPreferences() {
         String quality = mPreferences.getString(
                 CameraSettings.KEY_VIDEO_QUALITY,
-                CameraSettings.DEFAULT_VIDEO_QUALITY_VALUE);
+                CameraSettings.getDefaultVideoQualityValue());
 
-        boolean videoQualityHigh = CameraSettings.getVideoQuality(quality);
+        if(!"custom".equalsIgnoreCase(quality)){
 
-        // Set video quality.
-        Intent intent = getIntent();
-        if (intent.hasExtra(MediaStore.EXTRA_VIDEO_QUALITY)) {
-            int extraVideoQuality =
-                    intent.getIntExtra(MediaStore.EXTRA_VIDEO_QUALITY, 0);
-            videoQualityHigh = (extraVideoQuality > 0);
-        }
+            boolean videoQualityHigh = CameraSettings.getVideoQuality(quality);
 
-        // Set video duration limit. The limit is read from the preference,
-        // unless it is specified in the intent.
-        if (intent.hasExtra(MediaStore.EXTRA_DURATION_LIMIT)) {
-            int seconds =
-                    intent.getIntExtra(MediaStore.EXTRA_DURATION_LIMIT, 0);
-            mMaxVideoDurationInMs = 1000 * seconds;
+            // Set video quality.
+            Intent intent = getIntent();
+            if (intent.hasExtra(MediaStore.EXTRA_VIDEO_QUALITY)) {
+                int extraVideoQuality =
+                        intent.getIntExtra(MediaStore.EXTRA_VIDEO_QUALITY, 0);
+                videoQualityHigh = (extraVideoQuality > 0);
+            }
+
+            // Set video duration limit. The limit is read from the preference,
+            // unless it is specified in the intent.
+            if (intent.hasExtra(MediaStore.EXTRA_DURATION_LIMIT)) {
+                int seconds =
+                        intent.getIntExtra(MediaStore.EXTRA_DURATION_LIMIT, 0);
+                mMaxVideoDurationInMs = 1000 * seconds;
+            } else {
+                mMaxVideoDurationInMs =
+                        CameraSettings.getVidoeDurationInMillis(quality);
+            }
+            mProfile = CameraSettings.getCamcorderProfile(videoQualityHigh);
         } else {
-            mMaxVideoDurationInMs =
-                    CameraSettings.getVidoeDurationInMillis(quality);
+            mProfile = null;
+
+            String videoEncoder = mPreferences.getString(
+                        CameraSettings.KEY_VIDEO_ENCODER,
+                        getString(R.string.pref_camera_videoencoder_default));
+            int encoderId = VIDEO_ENCODER_TABLE.get(videoEncoder);
+            if (encoderId != mVideoEncoder) {
+                mHandler.sendEmptyMessage(RELOAD_HUD);
+            }
+            mVideoEncoder = encoderId;
+
+            String audioEncoder = mPreferences.getString(
+                        CameraSettings.KEY_AUDIO_ENCODER,
+                        getString(R.string.pref_camera_audioencoder_default));
+
+            String videoQuality = mPreferences.getString(
+                     CameraSettings.KEY_VIDEO_SIZE,
+                        getString(R.string.pref_camera_videosize_default));
+
+            StringTokenizer tokenizer = null;
+            if(videoQuality != null &&
+                        ( tokenizer = new StringTokenizer(
+                              videoQuality ,"x")).countTokens() == 2){
+                mVideoWidth = Integer.parseInt(tokenizer.nextToken());
+                mVideoHeight = Integer.parseInt(tokenizer.nextToken());
+                mVideoBitrate = VIDEOQUALITY_BITRATE_TABLE.get(videoQuality);
+            } else {
+                mVideoWidth = 320;
+                mVideoHeight = 240;
+                mVideoBitrate = 320000;
+            }
+
+            mVideoEncoder = VIDEO_ENCODER_TABLE.get(videoEncoder);
+            mAudioEncoder = AUDIO_ENCODER_TABLE.get(audioEncoder);
+
+            String minutesStr = mPreferences.getString(CameraSettings.KEY_VIDEO_DURATION,
+                              CameraSettings.DEFAULT_VIDEO_DURATION_VALUE+"");
+
+            int minutes = -1;
+            try{
+	        minutes = Integer.parseInt(minutesStr);
+	    }catch(NumberFormatException npe){
+	        // use default value continue
+	        minutes = CameraSettings.DEFAULT_VIDEO_DURATION_VALUE;
         }
-        mProfile = CamcorderProfile.get(videoQualityHigh
-                ? CamcorderProfile.QUALITY_HIGH
-                : CamcorderProfile.QUALITY_LOW);
+
+            if (minutes == -1) {
+                // This is a special case: the value -1 means we want to use the
+                // device-dependent duration for MMS messages. The value is
+                // represented in seconds.
+
+                mMaxVideoDurationInMs =
+                       CameraSettings.getVidoeDurationInMillis("mms");
+
+            } else {
+                // 1 minute = 60000ms
+                mMaxVideoDurationInMs = 60000 * minutes;
+            }
+        }
+        updateProfileInHud();
     }
 
     private void resizeForPreviewAspectRatio() {
-        mPreviewFrameLayout.setAspectRatio(
-                (double) mProfile.videoFrameWidth / mProfile.videoFrameHeight);
+        if(mProfile != null){
+            mPreviewFrameLayout.setAspectRatio(
+                     (double) mProfile.videoFrameWidth / mProfile.videoFrameHeight);
+        } else {
+            mPreviewFrameLayout.setAspectRatio( ((double) mVideoWidth) / mVideoHeight);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         mPausing = false;
-
-        mVideoPreview.setVisibility(View.VISIBLE);
+        mOrientationListener.enable();
+        mSurfaceView.setVisibility(View.VISIBLE);
         readVideoPreferences();
         resizeForPreviewAspectRatio();
         if (!mPreviewing && !mStartPreviewFail) {
@@ -567,6 +865,7 @@ public class VideoCamera extends NoSearchActivity
                 return;
             }
         }
+        changeHeadUpDisplayState();
         keepScreenOnAwhile();
 
         // install an intent filter to receive SD card related events.
@@ -590,8 +889,6 @@ public class VideoCamera extends NoSearchActivity
         if (mSurfaceHolder != null) {
             mHandler.sendEmptyMessage(INIT_RECORDER);
         }
-
-        changeHeadUpDisplayState();
     }
 
     private void setPreviewDisplay(SurfaceHolder holder) {
@@ -604,7 +901,8 @@ public class VideoCamera extends NoSearchActivity
     }
 
     private void startPreview() throws CameraHardwareException {
-        Log.v(TAG, "startPreview");
+        Log.d(TAG, "startPreview");
+
         if (mPreviewing) {
             // After recording a video, preview is not stopped. So just return.
             return;
@@ -620,19 +918,17 @@ public class VideoCamera extends NoSearchActivity
         setCameraParameters();
         setPreviewDisplay(mSurfaceHolder);
 
+        // Disable orientation effect at 720p until frame is removed
+        if (CameraSettings.is720p(mParameters)) {
+            mOrientationListener.disable();
+        }
+
         try {
             mCameraDevice.startPreview();
             mPreviewing = true;
         } catch (Throwable ex) {
             closeCamera();
             throw new RuntimeException("startPreview failed", ex);
-        }
-
-        // If setPreviewDisplay has been set with a valid surface, unlock now.
-        // If surface is null, unlock later. Otherwise, setPreviewDisplay in
-        // surfaceChanged will fail.
-        if (mSurfaceHolder != null) {
-            mCameraDevice.unlock();
         }
     }
 
@@ -642,7 +938,7 @@ public class VideoCamera extends NoSearchActivity
             Log.d(TAG, "already stopped.");
             return;
         }
-        // If we don't lock the camera, release() will fail.
+        releaseMediaRecorder();
         mCameraDevice.lock();
         CameraHolder.instance().release();
         mCameraDevice = null;
@@ -653,12 +949,12 @@ public class VideoCamera extends NoSearchActivity
     protected void onPause() {
         super.onPause();
         mPausing = true;
-
+        mOrientationListener.disable();
         changeHeadUpDisplayState();
 
         // Hide the preview now. Otherwise, the preview may be rotated during
         // onPause and it is annoying to users.
-        mVideoPreview.setVisibility(View.INVISIBLE);
+        mSurfaceView.setVisibility(View.INVISIBLE);
 
         // This is similar to what mShutterButton.performClick() does,
         // but not quite the same.
@@ -751,6 +1047,7 @@ public class VideoCamera extends NoSearchActivity
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+        Log.d(TAG, "surfaceChanged");
         // Make sure we have a surface in the holder before proceeding.
         if (holder.getSurface() == null) {
             Log.d(TAG, "holder.getSurface() == null");
@@ -782,6 +1079,8 @@ public class VideoCamera extends NoSearchActivity
             setPreviewDisplay(holder);
             mCameraDevice.unlock();
             mHandler.sendEmptyMessage(INIT_RECORDER);
+        } else {
+            mCameraDevice.unlock();
         }
     }
 
@@ -862,8 +1161,6 @@ public class VideoCamera extends NoSearchActivity
         }
     }
 
-    private android.hardware.Camera mCameraDevice;
-
     // Prepares media recorder.
     private void initializeRecorder() {
         Log.v(TAG, "initializeRecorder");
@@ -897,9 +1194,29 @@ public class VideoCamera extends NoSearchActivity
         mMediaRecorder.setCamera(mCameraDevice);
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        mMediaRecorder.setProfile(mProfile);
-        mMediaRecorder.setMaxDuration(mMaxVideoDurationInMs);
+        if(mProfile != null){
+            mMediaRecorder.setProfile(mProfile);
+            mMediaRecorder.setMaxDuration(mMaxVideoDurationInMs);
+        }
+        else {
 
+            mMediaRecorder.setOutputFormat(OUTPUT_FORMAT_TABLE.get(mOutputFormat));
+            mMediaRecorder.setMaxDuration(mMaxVideoDurationInMs);
+            mMediaRecorder.setVideoFrameRate(mVideoFps);
+            mMediaRecorder.setVideoSize(mVideoWidth, mVideoHeight);
+            mMediaRecorder.setVideoEncodingBitRate(mVideoBitrate);
+            mMediaRecorder.setVideoEncoder(mVideoEncoder);
+            mMediaRecorder.setAudioEncoder(mAudioEncoder);
+            Log.v(TAG, "Custom format " +
+                       " output format " + OUTPUT_FORMAT_TABLE.get(mOutputFormat) +
+                       " Video Fps " +  mVideoFps +
+                       " Video Bitrate " + mVideoBitrate +
+                       " Max Video Duration "  + mMaxVideoDurationInMs+
+                       " Video Encoder "  + mVideoEncoder +
+                       " Audio Encoder "  + mAudioEncoder);
+        }
+
+        updateAndShowStorageHint(true);
         // Set output file.
         if (mStorageStatus != STORAGE_STATUS_OK) {
             mMediaRecorder.setOutputFile("/dev/null");
@@ -943,6 +1260,11 @@ public class VideoCamera extends NoSearchActivity
         }
         mMediaRecorderRecording = false;
 
+        resetFocusIndicator();
+        if (mFocusRectangle != null) {
+            mFocusRectangle.clear();
+        }
+
         // Update the last video thumbnail.
         if (!mIsVideoCaptureIntent) {
             if (!mThumbController.isUriValid()) {
@@ -953,7 +1275,7 @@ public class VideoCamera extends NoSearchActivity
     }
 
     private void releaseMediaRecorder() {
-        Log.v(TAG, "Releasing media recorder.");
+        Log.d(TAG, "releaseMediaRecorder");
         if (mMediaRecorder != null) {
             cleanupEmptyFile();
             mMediaRecorder.reset();
@@ -965,7 +1287,13 @@ public class VideoCamera extends NoSearchActivity
     private void createVideoPath() {
         long dateTaken = System.currentTimeMillis();
         String title = createName(dateTaken);
-        String filename = title + ".3gp"; // Used when emailing.
+        String filename;
+        if (mProfile == null) {
+            filename = title + "." + mOutputFormat;
+        } else {
+            filename = title + (MediaRecorder.OutputFormat.MPEG_4 == mProfile.fileFormat ? ".mp4" : ".3gp"); // Used when emailing.
+        }
+
         String cameraDirPath = ImageManager.CAMERA_IMAGE_BUCKET_NAME;
         String filePath = cameraDirPath + "/" + filename;
         File cameraDir = new File(cameraDirPath);
@@ -974,7 +1302,12 @@ public class VideoCamera extends NoSearchActivity
         values.put(Video.Media.TITLE, title);
         values.put(Video.Media.DISPLAY_NAME, filename);
         values.put(Video.Media.DATE_TAKEN, dateTaken);
-        values.put(Video.Media.MIME_TYPE, "video/3gpp");
+        if (mProfile == null) {
+            values.put(Video.Media.MIME_TYPE, "video/" + ("3gp".equals(mOutputFormat) ? "3gpp" : "mp4"));
+        } else {
+            values.put(Video.Media.MIME_TYPE, "video/" +
+                    (MediaRecorder.OutputFormat.MPEG_4 == mProfile.fileFormat ? "mp4" : "3gpp"));
+        }
         values.put(Video.Media.DATA, filePath);
         mCameraVideoFilename = filePath;
         Log.v(TAG, "Current camera video filename: " + mCameraVideoFilename);
@@ -1021,12 +1354,21 @@ public class VideoCamera extends NoSearchActivity
         }
     }
 
-    private void addBaseMenuItems(Menu menu) {
+    private void addBaseMenuItems(final Menu menu) {
         MenuHelper.addSwitchModeMenuItem(menu, false, new Runnable() {
             public void run() {
                 switchToCameraMode();
             }
         });
+
+        if (CameraSwitch.hasCameraSwitch()) {
+            MenuHelper.addSwitchDeviceMenuItem(menu, new Runnable() {
+                public void run() {
+                    switchCameraDevice(CameraSettings.isMainCamera());
+                }
+            });
+        }
+
         MenuItem gallery = menu.add(Menu.NONE, Menu.NONE,
                 MenuHelper.POSITION_GOTO_GALLERY,
                 R.string.camera_gallery_photos_text)
@@ -1039,6 +1381,7 @@ public class VideoCamera extends NoSearchActivity
                     });
         gallery.setIcon(android.R.drawable.ic_menu_gallery);
         mGalleryItems.add(gallery);
+        mOptionsMenu = menu;
     }
 
     private PreferenceGroup filterPreferenceScreenByIntent(
@@ -1117,7 +1460,7 @@ public class VideoCamera extends NoSearchActivity
                 Log.e(TAG, "Could not start media recorder. ", e);
                 return;
             }
-            mHeadUpDisplay.setEnabled(false);
+            ((CamcorderHeadUpDisplay)mHeadUpDisplay).setVideoQualityControlsEnabled(false);
 
             mMediaRecorderRecording = true;
             mRecordingStartTime = SystemClock.uptimeMillis();
@@ -1237,11 +1580,18 @@ public class VideoCamera extends NoSearchActivity
             mRecordingTimeView.setVisibility(View.GONE);
             keepScreenOnAwhile();
         }
-        if (needToRegisterRecording && mStorageStatus == STORAGE_STATUS_OK) {
+        if (needToRegisterRecording && mStorageStatus == STORAGE_STATUS_OK && mCameraVideoFilename != null) {
             registerVideo();
         }
 
-        mCameraVideoFilename = null;
+        /*Make the videoCameraFilename null only if the respective file does not exist*/
+        try {
+            File f = new File(mCameraVideoFilename);
+            if(!f.exists())
+                mCameraVideoFilename = null;
+        } catch(NullPointerException e) {
+            Log.e(TAG, "StopVideoRecording: mCameraVideoFilename is null");
+        }
         mCameraVideoFileDescriptor = null;
     }
 
@@ -1354,15 +1704,17 @@ public class VideoCamera extends NoSearchActivity
                 UPDATE_RECORD_TIME, next_update_delay);
     }
 
-    private static boolean isSupported(String value, List<String> supported) {
-        return supported == null ? false : supported.indexOf(value) >= 0;
-    }
-
     private void setCameraParameters() {
         mParameters = mCameraDevice.getParameters();
 
-        mParameters.setPreviewSize(mProfile.videoFrameWidth, mProfile.videoFrameHeight);
-        mParameters.setPreviewFrameRate(mProfile.videoFrameRate);
+        if(mProfile != null) {
+            mParameters.setPreviewSize(mProfile.videoFrameWidth, mProfile.videoFrameHeight);
+            mParameters.setPreviewFrameRate(mProfile.videoFrameRate);
+        } else {
+            mParameters.setPreviewSize(mVideoWidth, mVideoHeight);
+            mParameters.setPreviewFrameRate(mVideoFps);
+        }
+        updateProfileInHud();
 
         // Set flash mode.
         String flashMode = mPreferences.getString(
@@ -1379,29 +1731,29 @@ public class VideoCamera extends NoSearchActivity
             }
         }
 
-        // Set white balance parameter.
-        String whiteBalance = mPreferences.getString(
-                CameraSettings.KEY_WHITE_BALANCE,
-                getString(R.string.pref_camera_whitebalance_default));
-        if (isSupported(whiteBalance,
-                mParameters.getSupportedWhiteBalance())) {
-            mParameters.setWhiteBalance(whiteBalance);
+        mFocusMode = mPreferences.getString(
+                CameraSettings.KEY_VIDEOCAMERA_FOCUS_MODE,
+                getString(R.string.pref_camera_focusmode_default));
+        if (Parameters.FOCUS_MODE_AUTO.equals(mFocusMode)) {
+            setStabilityChangeListener(mStabilityChangeListener);
+        } else if ("touch".equals(mFocusMode) || Parameters.FOCUS_MODE_INFINITY.equals(mFocusMode)) {
+            setStabilityChangeListener(null);
+        }
+
+        setCommonParameters();
+        setWhiteBalance();
+
+        CameraSettings.setCamMode(mParameters, CameraSettings.VIDEO_MODE);
+        setCameraHardwareParameters();
+    }
+
+    protected void setCameraHardwareParameters() {
+        CameraSettings.dumpParameters(mParameters);
+        if (mMediaRecorder != null) {
+            mMediaRecorder.setCameraParameters(mParameters.flatten());
         } else {
-            whiteBalance = mParameters.getWhiteBalance();
-            if (whiteBalance == null) {
-                whiteBalance = Parameters.WHITE_BALANCE_AUTO;
-            }
+            mCameraDevice.setParameters(mParameters);
         }
-
-        // Set color effect parameter.
-        String colorEffect = mPreferences.getString(
-                CameraSettings.KEY_COLOR_EFFECT,
-                getString(R.string.pref_camera_coloreffect_default));
-        if (isSupported(colorEffect, mParameters.getSupportedColorEffects())) {
-            mParameters.setColorEffect(colorEffect);
-        }
-
-        mCameraDevice.setParameters(mParameters);
     }
 
     private boolean switchToCameraMode() {
@@ -1432,33 +1784,46 @@ public class VideoCamera extends NoSearchActivity
     }
 
     private void resetCameraParameters() {
+
         // We need to restart the preview if preview size is changed.
         Size size = mParameters.getPreviewSize();
-        if (size.width != mProfile.videoFrameWidth
-                || size.height != mProfile.videoFrameHeight) {
+        boolean sizeChanged = true;
+        if(mProfile != null){
+            sizeChanged = size.width != mProfile.videoFrameWidth
+                            || size.height != mProfile.videoFrameHeight;
+        } else {
+            sizeChanged = size.width != mVideoWidth || size.height != mVideoHeight;
+        }
+        if (sizeChanged) {
             // It is assumed media recorder is released before
             // onSharedPreferenceChanged, so we can close the camera here.
+            mCameraDevice.stopPreview();
+            releaseMediaRecorder();
             closeCamera();
             try {
                 resizeForPreviewAspectRatio();
+                mHandler.sendEmptyMessage(RELOAD_HUD);
                 startPreview(); // Parameters will be set in startPreview().
             } catch (CameraHardwareException e) {
                 showCameraBusyAndFinish();
             }
         } else {
-            try {
-                // We need to lock the camera before writing parameters.
-                mCameraDevice.lock();
-            } catch (RuntimeException e) {
-                // When preferences are added for the first time, this method
-                // will be called. But OnScreenSetting is not displayed yet and
-                // media recorder still owns the camera. Lock will fail and we
-                // just ignore it.
-                return;
-            }
             setCameraParameters();
-            mCameraDevice.unlock();
         }
+    }
+
+    private boolean switchCameraDevice(boolean switchToSecondary) {
+        if (isFinishing() || mMediaRecorderRecording) return false;
+        CameraHolder.instance().setCameraNode(switchToSecondary ?
+                CameraSwitch.SWITCH_CAMERA_SECONDARY : CameraSwitch.SWITCH_CAMERA_MAIN);
+        MenuHelper.gotoVideoMode(this);
+        return true;
+    }
+
+    protected void onZoomValueChanged(int index) {
+        mZoomValue = index;
+        mParameters.setZoom(index);
+        setCameraHardwareParameters();
     }
 
     public void onSizeChanged() {
@@ -1492,11 +1857,9 @@ public class VideoCamera extends NoSearchActivity
     }
 
     private void onPopupWindowVisibilityChanged(int visibility) {
-        if (visibility == GLView.VISIBLE) {
-            releaseMediaRecorder();
-        } else {
-            if (!mPausing && mSurfaceHolder != null) initializeRecorder();
-        }
+        if (visibility != GLView.VISIBLE && !mPausing && mSurfaceHolder != null) {
+           initializeRecorder();
+         }
     }
 
     private void onRestorePreferencesClicked() {
@@ -1522,4 +1885,10 @@ public class VideoCamera extends NoSearchActivity
             resetCameraParameters();
         }
     }
+
+    @Override
+    protected int getCameraMode() {
+        return CameraSettings.VIDEO_MODE;
+    }
+
 }
