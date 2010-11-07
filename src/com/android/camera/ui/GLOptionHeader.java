@@ -19,6 +19,8 @@ package com.android.camera.ui;
 import static com.android.camera.ui.GLRootView.dpToPixel;
 import android.content.Context;
 import android.graphics.Rect;
+import android.text.FriBidi;
+import android.util.Log;
 
 import com.android.camera.R;
 
@@ -73,6 +75,10 @@ public class GLOptionHeader extends GLView {
             mBackground.draw(root, 0, 0);
         }
         Rect p = mPaddings;
-        mTitle.draw(root, p.left, p.top);
+        if (FriBidi.isRTL()) {
+            mTitle.draw(root, getWidth() - mTitle.getWidth() - p.right, p.top);
+        } else {
+            mTitle.draw(root, p.left, p.top);
+        }
     }
 }
