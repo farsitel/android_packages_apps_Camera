@@ -24,7 +24,7 @@ import com.android.camera.ui.ZoomController.ZoomListener;
 import java.text.DecimalFormat;
 
 public class ZoomIndicator extends AbstractIndicator {
-    private static final DecimalFormat sZoomFormat = new DecimalFormat("#.#x");
+    private static final String sZoomFormat = "%L.1fx"; //new DecimalFormat("#.#x");
     private static final float FONT_SIZE = 18;
     private static final int FONT_COLOR = 0xA8FFFFFF;
 
@@ -54,7 +54,7 @@ public class ZoomIndicator extends AbstractIndicator {
         for (int i = 0; i < n; ++i) {
             float value = mZoomRatios[i];
             Texture tex = StringTexture.newInstance(
-                    sZoomFormat.format(value), mFontSize, FONT_COLOR);
+                    String.format(sZoomFormat, value), mFontSize, FONT_COLOR);
             if (maxWidth < tex.getWidth()) maxWidth = tex.getWidth();
             if (maxHeight < tex.getHeight()) maxHeight = tex.getHeight();
         }
@@ -70,7 +70,7 @@ public class ZoomIndicator extends AbstractIndicator {
             if (mTitle != null) mTitle.deleteFromGL();
             float value = mZoomRatios == null ? 0 : mZoomRatios[mZoomIndex];
             mTitle = StringTexture.newInstance(
-                    sZoomFormat.format(value), mFontSize, FONT_COLOR);
+                    String.format(sZoomFormat, value), mFontSize, FONT_COLOR);
         }
         return mTitle;
     }
