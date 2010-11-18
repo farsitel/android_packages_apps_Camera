@@ -36,6 +36,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera.Parameters;
@@ -47,6 +48,7 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.media.AudioManager;
 import android.media.CameraProfile;
+import android.media.MediaPlayer;
 import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Build;
@@ -150,6 +152,8 @@ public class Camera extends BaseCamera {
     // mCropValue and mSaveUri are used only if isImageCaptureIntent() is true.
     private String mCropValue;
     private Uri mSaveUri;
+
+    private MediaPlayer mClickSound;
 
     private ImageCapture mImageCapture = null;
 
@@ -544,6 +548,9 @@ public class Camera extends BaseCamera {
             Log.v(TAG, "mShutterToPostViewCallbackTime = "
                     + (mPostViewPictureCallbackTime - mShutterCallbackTime)
                     + "ms");
+            if (mClickSound != null) {
+                mClickSound.start();
+            }
         }
     }
 
@@ -585,6 +592,11 @@ public class Camera extends BaseCamera {
                 mPictureDisplayedToJpegCallbackTime =
                         mJpegPictureCallbackTime - mRawPictureCallbackTime;
             }
+
+            if (mClickSound != null) {
+                mClickSound.start();
+            }
+
             Log.v(TAG, "mPictureDisplayedToJpegCallbackTime = "
                     + mPictureDisplayedToJpegCallbackTime + "ms");
             mHeadUpDisplay.setEnabled(true);
@@ -754,6 +766,11 @@ public class Camera extends BaseCamera {
             mCameraDevice.takePicture(mShutterCallback, mRawPictureCallback,
                     mPostViewPictureCallback, new JpegPictureCallback(loc));
             mPreviewing = false;
+
+            // Prepare the sound to play in shutter callback.
+            if (mClickSound != null) {
+                mClickSound.seekTo(0);
+            }
         }
 
         public void onSnap() {
@@ -877,6 +894,22 @@ public class Camera extends BaseCamera {
         }
 
         LayoutInflater inflater = getLayoutInflater();
+
+        try {
+            mClickSound = new MediaPlayer();
+            AssetFileDescriptor afd = getResources().openRawResourceFd(R.raw.camera_click);
+
+            mClickSound.setDataSource(afd.getFileDescriptor(),
+                             afd.getStartOffset(),
+                             afd.getLength());
+
+            if (mClickSound != null) {
+                mClickSound.setAudioStreamType(AudioManager.STREAM_ALARM);
+                mClickSound.prepare();
+            }
+        } catch (Exception ex) {
+            Log.w(TAG, "Couldn't create click sound", ex);
+        }
 
         ViewGroup rootView = (ViewGroup) findViewById(R.id.camera);
         if (mIsImageCaptureIntent) {
