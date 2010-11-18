@@ -1347,7 +1347,6 @@ public class Camera extends BaseCamera {
                 }
             } else {
                 mCameraDevice.autoFocus(new android.hardware.Camera.AutoFocusCallback() { 
-                    @Override
                     public void onAutoFocus(boolean success, android.hardware.Camera camera) {
                         mFocusState = success ? FOCUS_SUCCESS : FOCUS_FAIL;
                         updateFocusIndicator();
