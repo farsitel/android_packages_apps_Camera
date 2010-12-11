@@ -169,6 +169,7 @@ public class VideoCamera extends BaseCamera implements
     private int mVideoBitrate;
     private String mOutputFormat = "3gp";
     private int mVideoFps = 30;
+    private boolean focusModeChanged;
 
 
     //
@@ -526,11 +527,7 @@ public class VideoCamera extends BaseCamera implements
 
         initializeZoom();
         initializeTouchFocus();
-        if (!mSmoothZoomSupported) {
-            setStabilityChangeListener(mStabilityChangeListener);
-        } else {
-            setStabilityChangeListener(null);
-        }
+        updateFocusMode();
     }
 
     private void overrideHudSettings(final String videoEncoder,
@@ -935,6 +932,7 @@ public class VideoCamera extends BaseCamera implements
             closeCamera();
             throw new RuntimeException("startPreview failed", ex);
         }
+
     }
 
     private void closeCamera() {
@@ -1082,10 +1080,7 @@ public class VideoCamera extends BaseCamera implements
         // already started.
         if (holder.isCreating()) {
             setPreviewDisplay(holder);
-            mCameraDevice.unlock();
             mHandler.sendEmptyMessage(INIT_RECORDER);
-        } else {
-            mCameraDevice.unlock();
         }
     }
 
@@ -1195,6 +1190,13 @@ public class VideoCamera extends BaseCamera implements
             requestedSizeLimit = myExtras.getLong(MediaStore.EXTRA_SIZE_LIMIT);
         }
         mMediaRecorder = new MediaRecorder();
+
+        // If we got here locked... make sure we unlock. Not pretty, but
+        // until the race condition is properly fixed it'll have to do
+
+        try { // There should be a method to check if the camera is locked
+            mCameraDevice.unlock();
+        } catch (RuntimeException rte) {}
 
         mMediaRecorder.setCamera(mCameraDevice);
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -1736,22 +1738,34 @@ public class VideoCamera extends BaseCamera implements
             }
         }
 
+        updateFocusMode();
+        setCommonParameters();
+        setWhiteBalance();
+        if (focusModeChanged) {
+            mHandler.sendEmptyMessage(RELOAD_HUD);
+        }
+        CameraSettings.setCamMode(mParameters, CameraSettings.VIDEO_MODE);
+        setCameraHardwareParameters();
+    }
+
+    private void updateFocusMode() {
+        String oldmode = mFocusMode;
         mFocusMode = mPreferences.getString(
                 CameraSettings.KEY_VIDEOCAMERA_FOCUS_MODE,
                 getString(R.string.pref_camera_focusmode_default));
-        if (Parameters.FOCUS_MODE_AUTO.equals(mFocusMode) && !mSmoothZoomSupported) {
+        if (Parameters.FOCUS_MODE_AUTO.equals(mFocusMode)) {
             setStabilityChangeListener(mStabilityChangeListener);
+            mParameters.setFocusMode(mFocusMode);
         } else if ("touch".equals(mFocusMode) ||
-                Parameters.FOCUS_MODE_INFINITY.equals(mFocusMode) ||
-                mSmoothZoomSupported == true) {
+                Parameters.FOCUS_MODE_INFINITY.equals(mFocusMode)) {
             setStabilityChangeListener(null);
+            mParameters.setFocusMode(Parameters.FOCUS_MODE_INFINITY);
         }
-
-        setCommonParameters();
-        setWhiteBalance();
-
-        CameraSettings.setCamMode(mParameters, CameraSettings.VIDEO_MODE);
-        setCameraHardwareParameters();
+        if (oldmode != mFocusMode) {
+            focusModeChanged = true;
+        } else {
+            focusModeChanged = false;
+        }
     }
 
     protected void setCameraHardwareParameters() {
@@ -1801,7 +1815,7 @@ public class VideoCamera extends BaseCamera implements
         } else {
             sizeChanged = size.width != mVideoWidth || size.height != mVideoHeight;
         }
-        if (sizeChanged) {
+        if (sizeChanged || (mSmoothZoomSupported && focusModeChanged)) {
             // It is assumed media recorder is released before
             // onSharedPreferenceChanged, so we can close the camera here.
             mCameraDevice.stopPreview();
