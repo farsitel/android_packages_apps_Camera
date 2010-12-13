@@ -1377,23 +1377,25 @@ public class Camera extends BaseCamera {
     }
 
     private void autoFocusFast() {
-        if (canTakePicture()) {
-            mFocusState = FOCUSING;
-            mFocusStartTime = System.currentTimeMillis();
-            updateFocusIndicator();
-            if (mSmoothZoomSupported) {
-                mCameraDevice.autoFocus(mAutoFocusCallback);
-                if (mFocusState == FOCUSING || mFocusState == FOCUS_SUCCESS
-                        || mFocusState == FOCUS_FAIL) {
-                    mHeadUpDisplay.setEnabled(true);
-                }
-            } else {
-                mCameraDevice.autoFocus(new android.hardware.Camera.AutoFocusCallback() { 
-                    public void onAutoFocus(boolean success, android.hardware.Camera camera) {
-                        mFocusState = success ? FOCUS_SUCCESS : FOCUS_FAIL;
-                        updateFocusIndicator();
+        synchronized (this) {
+            if (canTakePicture()) {
+                mFocusState = FOCUSING;
+                mFocusStartTime = System.currentTimeMillis();
+                updateFocusIndicator();
+                if (mSmoothZoomSupported) {
+                    mCameraDevice.autoFocus(mAutoFocusCallback);
+                    if (mFocusState == FOCUSING || mFocusState == FOCUS_SUCCESS
+                            || mFocusState == FOCUS_FAIL) {
+                        mHeadUpDisplay.setEnabled(true);
                     }
-                });
+                } else {
+                    mCameraDevice.autoFocus(new android.hardware.Camera.AutoFocusCallback() { 
+                        public void onAutoFocus(boolean success, android.hardware.Camera camera) {
+                            mFocusState = success ? FOCUS_SUCCESS : FOCUS_FAIL;
+                            updateFocusIndicator();
+                        }
+                    });
+                }
             }
         }
     }
@@ -1511,10 +1513,12 @@ public class Camera extends BaseCamera {
 
 
     private void doSnap() {
-        if (mHeadUpDisplay.collapse()) return;
+        synchronized(this) {
+            if (mHeadUpDisplay.collapse()) return;
 
-        Log.d(TAG, "doSnap: mFocusState=" + mFocusState + " mFocusMode=" + mFocusMode);
-        mImageCapture.onSnap();
+            Log.d(TAG, "doSnap: mFocusState=" + mFocusState + " mFocusMode=" + mFocusMode);
+            mImageCapture.onSnap();
+        }
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
@@ -1578,7 +1582,7 @@ public class Camera extends BaseCamera {
         }
     }
 
-    private void ensureCameraDevice() throws CameraHardwareException {
+    private synchronized void ensureCameraDevice() throws CameraHardwareException {
         if (mCameraDevice == null) {
             mCameraDevice = CameraHolder.instance().open();
             mInitialParams = mCameraDevice.getParameters();
@@ -1630,48 +1634,52 @@ public class Camera extends BaseCamera {
 
 
     private void startPreview() throws CameraHardwareException {
-        if (mPausing || isFinishing()) return;
+        synchronized (this) {
+            if (mPausing || isFinishing()) return;
 
-        ensureCameraDevice();
+            ensureCameraDevice();
 
-        // If we're previewing already, stop the preview first (this will blank
-        // the screen).
-        if (mPreviewing) stopPreview();
-        clearFocusState();
-        resetFocusIndicator();
+            // If we're previewing already, stop the preview first (this will blank
+            // the screen).
+            if (mPreviewing) stopPreview();
+            clearFocusState();
+            resetFocusIndicator();
 
-        setPreviewDisplay(mSurfaceHolder);
-        setCameraParameters(UPDATE_PARAM_ALL);
+            setPreviewDisplay(mSurfaceHolder);
+            setCameraParameters(UPDATE_PARAM_ALL);
 
-        mCameraDevice.setErrorCallback(mErrorCallback);
+            mCameraDevice.setErrorCallback(mErrorCallback);
 
-        try {
-            Log.v(TAG, "startPreview");
-            mCameraDevice.startPreview();
-        } catch (Throwable ex) {
-            closeCamera();
-            throw new RuntimeException("startPreview failed", ex);
+            try {
+                Log.v(TAG, "startPreview");
+                mCameraDevice.startPreview();
+            } catch (Throwable ex) {
+                closeCamera();
+                throw new RuntimeException("startPreview failed", ex);
+            }
+            mPreviewing = true;
+            mZoomState = ZOOM_STOPPED;
+            mStatus = IDLE;
+
+            /* Get the correct max zoom value, as this varies with
+            * preview size/picture resolution
+            */
+            mParameters = mCameraDevice.getParameters();
+
+            mZoomMax = mParameters.getMaxZoom();
         }
-        mPreviewing = true;
-        mZoomState = ZOOM_STOPPED;
-        mStatus = IDLE;
-
-        /* Get the correct max zoom value, as this varies with
-        * preview size/picture resolution
-        */
-        mParameters = mCameraDevice.getParameters();
-        
-        mZoomMax = mParameters.getMaxZoom();
     }
 
     private void stopPreview() {
-        if (mCameraDevice != null && mPreviewing) {
-            Log.v(TAG, "stopPreview");
-            mCameraDevice.stopPreview();
+        synchronized (this) {
+            if (mCameraDevice != null && mPreviewing) {
+                Log.v(TAG, "stopPreview");
+                mCameraDevice.stopPreview();
+            }
+            mPreviewing = false;
+            // If auto focus was in progress, it would have been canceled.
+            clearFocusState();
         }
-        mPreviewing = false;
-        // If auto focus was in progress, it would have been canceled.
-        clearFocusState();
     }
 
     private Size getOptimalPreviewSize(List<Size> sizes, double targetRatio) {
@@ -2214,35 +2222,39 @@ public class Camera extends BaseCamera {
     }
 
     private void doSnapClassic() {
-        if (mHeadUpDisplay.collapse()) return;
-        Log.d(TAG, "doSnap: mFocusState=" + mFocusState + " mFocusMode=" + mFocusMode);
-        // If the user has half-pressed the shutter and focus is completed, we
-        // can take the photo right away. If the focus mode is infinity, we can
-        // also take the photo.
-        if (mFocusMode.equals(Parameters.FOCUS_MODE_INFINITY)
-                || mFocusMode.equals("touch")
-                || mFocusState == FOCUS_SUCCESS
-                || mFocusState == FOCUS_FAIL) {
-            mImageCapture.onSnap();
-        } else if (mFocusState == FOCUSING) {
-        // Half pressing the shutter (i.e. the focus button event) will
-        // already have requested AF for us, so just request capture on
-        // focus here.
-            mFocusState = FOCUSING_SNAP_ON_FINISH;
-        } else if (mFocusState == FOCUS_NOT_STARTED) {
-        // Focus key down event is dropped for some reasons. Just ignore.
+        synchronized (this) {
+            if (mHeadUpDisplay.collapse()) return;
+            Log.d(TAG, "doSnap: mFocusState=" + mFocusState + " mFocusMode=" + mFocusMode);
+            // If the user has half-pressed the shutter and focus is completed, we
+            // can take the photo right away. If the focus mode is infinity, we can
+            // also take the photo.
+            if (mFocusMode.equals(Parameters.FOCUS_MODE_INFINITY)
+                    || mFocusMode.equals("touch")
+                    || mFocusState == FOCUS_SUCCESS
+                    || mFocusState == FOCUS_FAIL) {
+                mImageCapture.onSnap();
+            } else if (mFocusState == FOCUSING) {
+            // Half pressing the shutter (i.e. the focus button event) will
+            // already have requested AF for us, so just request capture on
+            // focus here.
+                mFocusState = FOCUSING_SNAP_ON_FINISH;
+            } else if (mFocusState == FOCUS_NOT_STARTED) {
+            // Focus key down event is dropped for some reasons. Just ignore.
+            }
         }
     }
 
     private void doFocusClassic(boolean pressed) {
         // Do the focus if the mode is not infinity.
-        if (mHeadUpDisplay.collapse()) return;
-        if (!mFocusMode.equals(Parameters.FOCUS_MODE_INFINITY) && !mFocusMode.equals("touch")) {
-            if (pressed) {  // Focus key down.
-                autoFocusClassic();
-                resetFocusIndicator();
-            } else {  // Focus key up.
-                cancelAutoFocusClassic();
+        synchronized (this) {
+            if (mHeadUpDisplay.collapse()) return;
+            if (!mFocusMode.equals(Parameters.FOCUS_MODE_INFINITY) && !mFocusMode.equals("touch")) {
+                if (pressed) {  // Focus key down.
+                    autoFocusClassic();
+                    resetFocusIndicator();
+                } else {  // Focus key up.
+                    cancelAutoFocusClassic();
+                }
             }
         }
     }
@@ -2251,25 +2263,29 @@ public class Camera extends BaseCamera {
         // Initiate autofocus only when preview is started and snapshot is not
         // in progress.
         if (canTakePicture()) {
-            mHeadUpDisplay.setEnabled(false);
-            Log.v(TAG, "Start autofocus.");
-            mFocusStartTime = System.currentTimeMillis();
-            mFocusState = FOCUSING;
-            updateFocusIndicator();
-            mCameraDevice.autoFocus(mAutoFocusCallback);
+            synchronized (this) {
+                mHeadUpDisplay.setEnabled(false);
+                Log.v(TAG, "Start autofocus.");
+                mFocusStartTime = System.currentTimeMillis();
+                mFocusState = FOCUSING;
+                updateFocusIndicator();
+                mCameraDevice.autoFocus(mAutoFocusCallback);
+            }
         }
     }
 
     private void cancelAutoFocusClassic() {
-        // User releases half-pressed focus key.
-        if (mFocusState == FOCUSING || mFocusState == FOCUS_SUCCESS
-                || mFocusState == FOCUS_FAIL) {
-            Log.v(TAG, "Cancel autofocus.");
-            mHeadUpDisplay.setEnabled(true);
-            mCameraDevice.cancelAutoFocus();
-        }
-        if (mFocusState != FOCUSING_SNAP_ON_FINISH) {
-            clearFocusState();
+        synchronized (this) {
+            // User releases half-pressed focus key.
+            if (mFocusState == FOCUSING || mFocusState == FOCUS_SUCCESS
+                    || mFocusState == FOCUS_FAIL) {
+                Log.v(TAG, "Cancel autofocus.");
+                mHeadUpDisplay.setEnabled(true);
+                mCameraDevice.cancelAutoFocus();
+            }
+            if (mFocusState != FOCUSING_SNAP_ON_FINISH) {
+                clearFocusState();
+            }
         }
     }
 
