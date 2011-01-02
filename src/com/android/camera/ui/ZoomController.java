@@ -25,7 +25,6 @@ import android.view.MotionEvent;
 import com.android.camera.R;
 import com.android.camera.Util;
 
-import java.text.DecimalFormat;
 import java.util.Arrays;
 
 import javax.microedition.khronos.opengles.GL11;
@@ -33,7 +32,7 @@ import javax.microedition.khronos.opengles.GL11;
 public class ZoomController extends GLView {
     private static final int LABEL_COLOR = Color.WHITE;
 
-    private static final DecimalFormat sZoomFormat = new DecimalFormat("#.#x");
+    private static final String sZoomFormat = "%L.1fx"; //new DecimalFormat("#.#x");
     private static final int INVALID_POSITION = Integer.MAX_VALUE;
 
     private static final float LABEL_FONT_SIZE = 11;
@@ -166,7 +165,7 @@ public class ZoomController extends GLView {
                 (ratios.length + mLabelStep - 1) / mLabelStep];
         for (int i = 0, n = mTickLabels.length; i < n; ++i) {
             mTickLabels[i] = StringTexture.newInstance(
-                    sZoomFormat.format(ratios[i * mLabelStep]),
+                    String.format(sZoomFormat, ratios[i * mLabelStep]),
                     sLabelSize, LABEL_COLOR);
         }
         mFineTickStep = mLabelStep % 3 == 0

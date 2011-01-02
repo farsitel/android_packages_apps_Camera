@@ -21,6 +21,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.view.MotionEvent;
+import android.text.format.Jalali;
 
 import com.android.camera.R;
 import com.android.camera.Util;
@@ -165,7 +166,7 @@ public class SettingsController extends GLView {
                 (values.length + mLabelStep - 1) / mLabelStep];
         for (int i = 0, n = mTickLabels.length; i < n; ++i) {
             mTickLabels[i] = StringTexture.newInstance(
-                    String.valueOf(values[i * mLabelStep]),
+                    Jalali.persianDigitsIfPersian(String.valueOf(values[i * mLabelStep]), true),
                     sLabelSize, LABEL_COLOR);
         }
         mFineTickStep = mLabelStep % 3 == 0

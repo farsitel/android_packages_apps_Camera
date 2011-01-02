@@ -29,6 +29,7 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.Scroller;
+import android.text.FriBidi;
 
 import com.android.camera.Util;
 
@@ -183,7 +184,11 @@ public class GLListView extends GLView {
                     mScrollBarAnimation = null;
                 }
             } else {
-                mScrollbar.draw(root, getWidth() - width, yoffset);
+                if (FriBidi.isRTL()) {
+                    mScrollbar.draw(root, 0, yoffset);
+                } else {
+                    mScrollbar.draw(root, getWidth() - width, yoffset);
+                }
             }
         }
         if (mScroller.computeScrollOffset()) {

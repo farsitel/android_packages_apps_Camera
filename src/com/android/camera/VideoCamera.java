@@ -45,6 +45,7 @@ import android.media.EncoderCapabilities.VideoEncoderCap;
 import android.media.MediaRecorder;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.text.format.Jalali;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -1692,7 +1693,7 @@ public class VideoCamera extends BaseCamera implements
             }
             text = hoursString + ":" + text;
         }
-        mRecordingTimeView.setText(text);
+        mRecordingTimeView.setText(Jalali.persianDigitsIfPersian(text));
 
         if (mRecordingTimeCountsDown != countdownRemainingTime) {
             // Avoid setting the color on every update, do it only

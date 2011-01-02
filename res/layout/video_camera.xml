@@ -18,7 +18,7 @@
         xmlns:camera="http://schemas.android.com/apk/res/com.android.camera"
         android:id="@+id/video_camera"
         android:background="@drawable/camera_background"
-        android:orientation="horizontal"
+        android:orientation="horizontal_ltr"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     <com.android.camera.PreviewFrameLayout android:id="@+id/frame_layout"

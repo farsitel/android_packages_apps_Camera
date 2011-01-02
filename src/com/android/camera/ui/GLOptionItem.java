@@ -21,6 +21,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.view.animation.Transformation;
+import android.text.FriBidi;
 
 import com.android.camera.R;
 
@@ -112,7 +113,14 @@ public class GLOptionItem extends GLView {
         int width = getWidth() - p.left - p.right;
         int height = getHeight() - p.top - p.bottom;
 
-        int xoffset = p.left;
+        boolean rtl = FriBidi.isRTL();
+
+        int xoffset;
+        if (rtl) {
+            xoffset = width;
+        } else {
+            xoffset = p.left;
+        }
 
         Transformation trans = root.getTransformation();
         float oldAlpha = trans.getAlpha();
@@ -120,22 +128,44 @@ public class GLOptionItem extends GLView {
 
         ResourceTexture icon = mIcon;
         if (icon != null) {
-            icon.draw(root, xoffset,
-                    p.top + (height - icon.getHeight()) / 2);
-            xoffset += icon.getWidth();
+            if (rtl) {
+                xoffset -= icon.getWidth();
+                icon.draw(root, xoffset,
+                        p.top + (height - icon.getHeight()) / 2);
+            } else {
+                icon.draw(root, xoffset,
+                        p.top + (height - icon.getHeight()) / 2);
+                xoffset += icon.getWidth();
+            }
         } else {
-            xoffset += sNoIconLeadingSpace;
+            if (rtl) {
+                xoffset -= sNoIconLeadingSpace;
+            } else {
+                xoffset += sNoIconLeadingSpace;
+            }
         }
 
         StringTexture title = mText;
-        xoffset += sTextLeftPadding;
+        if (rtl) {
+            xoffset -= sTextLeftPadding;
+        } else {
+            xoffset += sTextLeftPadding;
+        }
         int yoffset = p.top + (height - title.getHeight()) / 2;
         //TODO: cut the text if it is too long
-        title.draw(root, xoffset, yoffset);
+        if (rtl) {
+            title.draw(root, xoffset - title.getWidth(), yoffset - 10);
+        } else {
+            title.draw(root, xoffset, yoffset);
+        }
 
         ResourceTexture checkbox = mCheckBox;
         yoffset = p.top + (height - checkbox.getHeight()) / 2;
-        checkbox.draw(root, width - checkbox.getWidth(), yoffset);
+        if (rtl) {
+            checkbox.draw(root, p.left, yoffset);
+        } else {
+            checkbox.draw(root, width - checkbox.getWidth(), yoffset);
+        }
         trans.setAlpha(oldAlpha);
     }
 

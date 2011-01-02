@@ -423,7 +423,6 @@ public abstract class BaseCamera extends NoSearchActivity implements View.OnClic
 
     protected android.hardware.Camera.AutoFocusCallback getAutoFocusCallback() {
         return new android.hardware.Camera.AutoFocusCallback() {
-            @Override
             public void onAutoFocus(boolean success, Camera camera) {
                 if (mFocusing) {
                     mFocusRectangle.showSuccess();
